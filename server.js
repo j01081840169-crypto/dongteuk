@@ -35,6 +35,34 @@ app.use(
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
+const cleanRoutes = {
+  "/main": "/main.html",
+  "/second": "/second.html",
+  "/notice": "/notice.html",
+  "/notice-view": "/notice-view.html",
+  "/notice-create": "/notice-create.html",
+  "/dispatch": "/dispatch.html",
+  "/dispatch-create": "/dispatch-create.html",
+  "/report": "/report.html",
+  "/office-work": "/office-work.html",
+  "/register-info": "/register-info.html",
+  "/paystub": "/paystub.html",
+  "/paystub-create": "/paystub-create.html",
+  "/paystub-receipt": "/paystub-receipt.html",
+  "/meal-claim": "/meal-claim.html",
+  "/extra-claim": "/extra-claim.html",
+  "/claim-lookup": "/claim-lookup.html",
+  "/attendance-lookup": "/attendance-lookup.html",
+  "/driver-performance": "/driver-performance.html",
+  "/settings": "/settings.html"
+};
+
+const htmlToClean = Object.fromEntries(
+  Object.entries(cleanRoutes).map(([clean, html]) => [html, clean])
+);
+
+const resolveHtmlPath = (reqPath) => cleanRoutes[reqPath] || reqPath;
+
 const adminOnlyPages = new Set([
   "/register-info.html",
   "/notice-create.html",
@@ -46,33 +74,45 @@ const adminOnlyPages = new Set([
 app.use((req, res, next) => {
   if (req.path.startsWith("/api")) return next();
   if (req.path === "/logout") return next();
-  const isHtml = req.path === "/" || req.path.endsWith(".html");
-  if (!isHtml) return next();
-  if (req.path === "/" || req.path === "/index.html") {
-    if (req.session?.user) {
-      return res.redirect("/second.html");
-    }
-    return res.redirect("/main.html");
+  const cleanPath = htmlToClean[req.path];
+  if (cleanPath) {
+    const suffix = req.originalUrl.slice(req.path.length);
+    return res.redirect(302, `${cleanPath}${suffix}`);
   }
-  if (req.path === "/main.html") {
+  const resolvedPath = resolveHtmlPath(req.path);
+  const isHtml = resolvedPath === "/" || resolvedPath.endsWith(".html");
+  if (!isHtml) return next();
+  if (resolvedPath === "/" || resolvedPath === "/index.html") {
     if (req.session?.user) {
-      return res.redirect("/second.html");
+      return res.redirect("/second");
+    }
+    return res.redirect("/main");
+  }
+  if (resolvedPath === "/main.html") {
+    if (req.session?.user) {
+      return res.redirect("/second");
     }
     return next();
   }
   if (!req.session?.user) {
-    return res.redirect("/main.html");
+    return res.redirect("/main");
   }
   res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
   res.set("Pragma", "no-cache");
   res.set("Expires", "0");
-  if (adminOnlyPages.has(req.path) && req.session.user.role !== "admin") {
-    return res.redirect("/second.html");
+  if (adminOnlyPages.has(resolvedPath) && req.session.user.role !== "admin") {
+    return res.redirect("/second");
   }
   return next();
 });
 
 app.use(express.static(path.join(__dirname)));
+
+Object.entries(cleanRoutes).forEach(([clean, html]) => {
+  app.get(clean, (req, res) => {
+    res.sendFile(path.join(__dirname, html));
+  });
+});
 
 const loginLimiter = rateLimit({
   windowMs: 60 * 1000,
@@ -189,7 +229,7 @@ app.post("/api/password", async (req, res) => {
 
 app.get("/logout", (req, res) => {
   req.session?.destroy(() => {
-    res.redirect("/main.html");
+    res.redirect("/main");
   });
 });
 

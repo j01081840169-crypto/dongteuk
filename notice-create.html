@@ -366,25 +366,55 @@
       }
     }
     /* role-menu-guard */
-    body:not(.is-admin) .menu a[href="register-info.html"],
-    body:not(.is-admin) .menu a[href="dispatch-create.html"],
-    body:not(.is-admin) .menu a[href="office-work.html"] {
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/register-info"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/dispatch-create"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/office-work"] {
       display: none !important;
     }
+      /* logo-layout-lock */
+    .logo {
+      width: 100px;
+      height: 24px;
+      object-fit: contain;
+      display: block;
+      flex-shrink: 0;
+    }
+    @media (max-width: 720px) {
+      .logo {
+        width: 88px;
+        height: 22px;
+      }
+    }
   </style>
+  <script>
+    // admin-class-boot
+    (() => {
+      const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      if (role === "admin" || role === "관리자") {
+        document.documentElement.classList.add("is-admin");
+        document.addEventListener("DOMContentLoaded", () => {
+          document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin");
+        });
+      }
+    })();
+  </script>
 </head>
 <body>
   <div class="layout">
     <aside class="sidebar">
-      <a href="second.html"><img class="logo" src="Dongteuk.png" alt="(二??숉듅 濡쒓퀬" /></a>
+      <a href="/second"><img class="logo" width="100" height="24" src="Dongteuk.png" alt="(二??숉듅 濡쒓퀬" /></a>
       <nav class="menu" aria-label="二쇱슂 硫붾돱">
-        <a href="second.html">&#50629;&#47924;&#54788;&#54889;</a>
-        <a class="active" href="notice.html">怨듭??ы빆</a>
-        <a href="dispatch.html">諛곗감?꾪솴</a>
-        <a href="report.html">湲곗궗?낅Т</a>
-        <a href="office-work.html">&#49324;&#47924;&#50629;&#47924;</a>
-        <a href="register-info.html">?깅줉?뺣낫</a>
-        <a href="settings.html">?ㅼ젙</a>
+        <a href="/second">&#50629;&#47924;&#54788;&#54889;</a>
+        <a class="active" href="/notice">怨듭??ы빆</a>
+        <a href="/dispatch">諛곗감?꾪솴</a>
+        <a href="/report">湲곗궗?낅Т</a>
+        <a href="/office-work">&#49324;&#47924;&#50629;&#47924;</a>
+        <a href="/register-info">?깅줉?뺣낫</a>
+        <a href="/settings">?ㅼ젙</a>
       </nav>
       <div class="sidebar-footer">
         <div class="login-meta">
@@ -427,7 +457,7 @@
       const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
       if (!currentUser) {
         alert("愿由ъ옄留??묎렐 媛?ν빀?덈떎.");
-        window.location.href = "notice.html";
+        window.location.href = "/notice";
         return false;
       }
             const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
@@ -441,7 +471,7 @@
       }
       if (!isAdmin) {
         alert("愿由ъ옄留??묎렐 媛?ν빀?덈떎.");
-        window.location.href = "notice.html";
+        window.location.href = "/notice";
         return false;
       }
       return true;
@@ -479,7 +509,7 @@
       });
       localStorage.setItem("dongteukNotices", JSON.stringify(notices));
       new BroadcastChannel("dongteuk-sync").postMessage({ key: "dongteukNotices" });
-      window.location.href = "notice.html?saved=1";
+      window.location.href = "/notice?saved=1";
     };
 
     document.getElementById("notice-save").addEventListener("click", saveNotice);
@@ -532,8 +562,9 @@
           isAdmin = false;
         }
       }
-      if (isAdmin) { document.body.classList.add("is-admin"); return; }
-      const targets = document.querySelectorAll('a[href="office-work.html"]');
+      if (isAdmin) { document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin"); return; }
+      const targets = document.querySelectorAll('a[href="/office-work"]');
       targets.forEach((el) => {
         el.style.display = "none";
         el.setAttribute("aria-hidden", "true");
@@ -543,5 +574,8 @@
   </script>
 </body>
 </html>
+
+
+
 
 

@@ -500,25 +500,55 @@ flex-direction: column;
       }
     }
     /* role-menu-guard */
-    body:not(.is-admin) .menu a[href="register-info.html"],
-    body:not(.is-admin) .menu a[href="dispatch-create.html"],
-    body:not(.is-admin) .menu a[href="office-work.html"] {
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/register-info"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/dispatch-create"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/office-work"] {
       display: none !important;
     }
+      /* logo-layout-lock */
+    .logo {
+      width: 100px;
+      height: 24px;
+      object-fit: contain;
+      display: block;
+      flex-shrink: 0;
+    }
+    @media (max-width: 720px) {
+      .logo {
+        width: 88px;
+        height: 22px;
+      }
+    }
   </style>
+  <script>
+    // admin-class-boot
+    (() => {
+      const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      if (role === "admin" || role === "관리자") {
+        document.documentElement.classList.add("is-admin");
+        document.addEventListener("DOMContentLoaded", () => {
+          document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin");
+        });
+      }
+    })();
+  </script>
 </head>
 <body>
   <div class="layout">
     <aside class="sidebar">
-      <a href="second.html"><img class="logo" src="Dongteuk.png" alt="(&#51452;&#46041;&#53945;&#32;&#47196;&#44256;)" /></a>
+      <a href="/second"><img class="logo" width="100" height="24" src="Dongteuk.png" alt="(&#51452;&#46041;&#53945;&#32;&#47196;&#44256;)" /></a>
       <nav class="menu" aria-label="&#51452;&#50836;&#32;&#47700;&#45684;">
-        <a href="second.html">&#50629;&#47924;&#54788;&#54889;</a>
-        <a href="notice.html">&#44277;&#51648;&#49324;&#54637;</a>
-        <a href="dispatch.html">&#48176;&#52264;&#54788;&#54889;</a>
-        <a href="report.html">&#44592;&#49324;&#50629;&#47924;</a>
-        <a href="office-work.html">&#49324;&#47924;&#50629;&#47924;</a>
-        <a href="register-info.html">&#46321;&#47197;&#51221;&#48372;</a>
-        <a href="settings.html">&#49444;&#51221;</a>
+        <a href="/second">&#50629;&#47924;&#54788;&#54889;</a>
+        <a href="/notice">&#44277;&#51648;&#49324;&#54637;</a>
+        <a href="/dispatch">&#48176;&#52264;&#54788;&#54889;</a>
+        <a href="/report">&#44592;&#49324;&#50629;&#47924;</a>
+        <a href="/office-work">&#49324;&#47924;&#50629;&#47924;</a>
+        <a href="/register-info">&#46321;&#47197;&#51221;&#48372;</a>
+        <a href="/settings">&#49444;&#51221;</a>
       </nav>
       <div class="sidebar-footer">
         <div class="login-meta">
@@ -675,13 +705,43 @@ flex-direction: column;
       }
     }
       /* role-menu-guard */
-    body:not(.is-admin) .menu a[href="register-info.html"],
-    body:not(.is-admin) .menu a[href="dispatch-create.html"],
-    body:not(.is-admin) .menu a[href="office-work.html"] {
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/register-info"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/dispatch-create"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/office-work"] {
       display: none !important;
     }
+      /* logo-layout-lock */
+    .logo {
+      width: 100px;
+      height: 24px;
+      object-fit: contain;
+      display: block;
+      flex-shrink: 0;
+    }
+    @media (max-width: 720px) {
+      .logo {
+        width: 88px;
+        height: 22px;
+      }
+    }
   </style>
-        </head>
+          <script>
+    // admin-class-boot
+    (() => {
+      const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      if (role === "admin" || role === "관리자") {
+        document.documentElement.classList.add("is-admin");
+        document.addEventListener("DOMContentLoaded", () => {
+          document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin");
+        });
+      }
+    })();
+  </script>
+</head>
         <body>
           <div class="wrap">
             <h1>${title}</h1>
@@ -1080,8 +1140,9 @@ flex-direction: column;
           isAdmin = false;
         }
       }
-      if (isAdmin) { document.body.classList.add("is-admin"); return; }
-      const targets = document.querySelectorAll('a[href="office-work.html"]');
+      if (isAdmin) { document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin"); return; }
+      const targets = document.querySelectorAll('a[href="/office-work"]');
       targets.forEach((el) => {
         el.style.display = "none";
         el.setAttribute("aria-hidden", "true");
@@ -1091,6 +1152,9 @@ flex-direction: column;
   </script>
 </body>
 </html>
+
+
+
 
 
 

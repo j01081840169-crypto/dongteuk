@@ -363,12 +363,42 @@
       }
     }
       /* role-menu-guard */
-    body:not(.is-admin) .menu a[href="register-info.html"],
-    body:not(.is-admin) .menu a[href="dispatch-create.html"],
-    body:not(.is-admin) .menu a[href="office-work.html"] {
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/register-info"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/dispatch-create"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/office-work"] {
       display: none !important;
     }
+      /* logo-layout-lock */
+    .logo {
+      width: 100px;
+      height: 24px;
+      object-fit: contain;
+      display: block;
+      flex-shrink: 0;
+    }
+    @media (max-width: 720px) {
+      .logo {
+        width: 88px;
+        height: 22px;
+      }
+    }
   </style>
+  <script>
+    // admin-class-boot
+    (() => {
+      const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      if (role === "admin" || role === "관리자") {
+        document.documentElement.classList.add("is-admin");
+        document.addEventListener("DOMContentLoaded", () => {
+          document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin");
+        });
+      }
+    })();
+  </script>
 </head>
 <body>
   <header class="page-header" aria-label="회사 로고">
@@ -494,10 +524,10 @@
         if (!localStorage.getItem(firstKey)) {
           localStorage.setItem(firstKey, "1");
           alert("최초 로그인입니다. 비밀번호를 변경해 주세요.");
-          window.location.href = "settings.html";
+          window.location.href = "/settings";
           return;
         }
-        window.location.href = "second.html";
+        window.location.href = "/second";
         return;
       }
       error.hidden = false;
@@ -506,6 +536,9 @@
   </script>
 </body>
 </html>
+
+
+
 
 
 
