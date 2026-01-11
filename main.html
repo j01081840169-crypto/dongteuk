@@ -568,7 +568,24 @@
         }
         return password === "0000";
       });
-      if (match) {
+      const seedMatch = !match
+        ? seedDrivers.find((driver) => (driver.name || "").trim() === username)
+        : null;
+      if (!match && seedMatch) {
+        const stored = passwords[username];
+        const ok = stored ? password === stored : password === "0000";
+        if (ok) {
+          const merged = drivers.slice();
+          const existingKeys = new Set(merged.map((item) => item.dongteukId || item.apkId || item.name));
+          const key = seedMatch.dongteukId || seedMatch.apkId || seedMatch.name;
+          if (!existingKeys.has(key)) {
+            merged.push(seedMatch);
+            localStorage.setItem("dongteukDrivers", JSON.stringify(merged));
+          }
+        }
+      }
+      const finalMatch = match || (seedMatch && (passwords[username] ? password === passwords[username] : password === "0000"));
+      if (finalMatch) {
         error.hidden = true;
         localStorage.setItem("dongteukCurrentUser", username);
         localStorage.setItem("dongteukLoginTime", new Date().toISOString());
