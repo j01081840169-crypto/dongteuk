@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
@@ -445,7 +445,13 @@ flex-direction: column;
         margin-bottom: 8px !important;
       }
     }
-</style>
+    /* role-menu-guard */
+    body:not(.is-admin) .menu a[href="register-info.html"],
+    body:not(.is-admin) .menu a[href="dispatch-create.html"],
+    body:not(.is-admin) .menu a[href="office-work.html"] {
+      display: none !important;
+    }
+  </style>
 </head>
 <body>
   <div class="layout">
@@ -471,21 +477,21 @@ flex-direction: column;
       <header class="page-header">
         <h1>&#50900;&#44553;&#47749;&#49464;&#49436;</h1>
         <div class="header-actions">
-          <button class="action-btn" type="button" onclick="location.href='paystub-create.html'">등록</button>
-          <button class="logout-btn" type="button" onclick="history.back()">뒤로가기</button>
+          <button class="action-btn" type="button" onclick="location.href='paystub-create.html'">?깅줉</button>
+          <button class="logout-btn" type="button" onclick="history.back()">?ㅻ줈媛湲?/button>
           <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">&#47196;&#44536;&#50500;&#50883;</button>
         </div>
       </header>
       <section class="card">
-        <h2>월급명세서</h2>
+        <h2>?붽툒紐낆꽭??/h2>
         <table class="paystub-table">
           <thead>
             <tr>
-              <th style="width: 90px;">년월</th>
-              <th style="width: 120px;">기사</th>
-              <th>파일</th>
-              <th style="width: 140px;">서명</th>
-              <th style="width: 90px;">등록일</th>
+              <th style="width: 90px;">?꾩썡</th>
+              <th style="width: 120px;">湲곗궗</th>
+              <th>?뚯씪</th>
+              <th style="width: 140px;">?쒕챸</th>
+              <th style="width: 90px;">?깅줉??/th>
             </tr>
           </thead>
           <tbody id="paystub-list"></tbody>
@@ -496,11 +502,11 @@ flex-direction: column;
   </div>
   <div class="signature-modal" id="signature-modal" aria-hidden="true">
     <div class="signature-dialog" role="dialog" aria-modal="true" aria-labelledby="signature-title">
-      <h3 id="signature-title">서명 확인</h3>
-      <img id="signature-image" alt="등록된 서명" />
+      <h3 id="signature-title">?쒕챸 ?뺤씤</h3>
+      <img id="signature-image" alt="?깅줉???쒕챸" />
       <div class="signature-actions">
-        <button type="button" id="signature-cancel">취소</button>
-        <button type="button" class="confirm" id="signature-confirm">수령확인</button>
+        <button type="button" id="signature-cancel">痍⑥냼</button>
+        <button type="button" class="confirm" id="signature-confirm">?섎졊?뺤씤</button>
       </div>
     </div>
   </div>
@@ -556,7 +562,7 @@ flex-direction: column;
       const all = readPaystubs();
       const item = all.find((row) => String(row.id) === String(id));
       if (!item || !item.fileData) {
-        alert("첨부된 파일이 없습니다.");
+        alert("泥⑤????뚯씪???놁뒿?덈떎.");
         return;
       }
       try {
@@ -584,23 +590,23 @@ flex-direction: column;
         rows.push(item);
       });
       if (!rows.length) {
-        paystubList.innerHTML = "<tr><td colspan=\"5\">등록된 월급명세서가 없습니다.</td></tr>";
+        paystubList.innerHTML = "<tr><td colspan=\"5\">?깅줉???붽툒紐낆꽭?쒓? ?놁뒿?덈떎.</td></tr>";
         if (paystubMeta) {
-          paystubMeta.textContent = "등록 0건 (본인 기준)";
+          paystubMeta.textContent = "?깅줉 0嫄?(蹂몄씤 湲곗?)";
         }
         return;
       }
       paystubList.innerHTML = rows
         .map((item) => {
           const ym = `${item.year || "-"}-${item.month || "--"}`;
-          const fileName = item.fileName || "파일 보기";
+          const fileName = item.fileName || "?뚯씪 蹂닿린";
           const fileLink = item.fileData
             ? `<button class="file-btn" type="button" data-id="${item.id}">${fileName}</button>`
             : "-";
           const signCell = item.fileData
             ? item.signed
-              ? "<span>수령완료</span>"
-              : `<button class="sign-btn" type="button" data-id="${item.id}">수령서명하기</button>`
+              ? "<span>?섎졊?꾨즺</span>"
+              : `<button class="sign-btn" type="button" data-id="${item.id}">?섎졊?쒕챸?섍린</button>`
             : "-";
           return `
             <tr>
@@ -614,7 +620,7 @@ flex-direction: column;
         })
         .join("");
       if (paystubMeta) {
-        paystubMeta.textContent = `등록 ${rows.length}건 (본인 기준)`;
+        paystubMeta.textContent = `?깅줉 ${rows.length}嫄?(蹂몄씤 湲곗?)`;
       }
     };
 
@@ -684,7 +690,7 @@ flex-direction: column;
         const signatureMap = readSignatureMap();
         const signatureData = signatureMap[currentUser] || "";
         if (!signatureData) {
-          alert("설정에서 서명이미지를 등록해 주세요.");
+          alert("?ㅼ젙?먯꽌 ?쒕챸?대?吏瑜??깅줉??二쇱꽭??");
           return;
         }
         openSignatureModal(signatureData, id);
@@ -728,17 +734,18 @@ flex-direction: column;
     // office-menu-guard
     (() => {
       const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
-      let isAdmin = false;
+            const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      let isAdmin = role === "admin" || role === "관리자";
       if (currentUser) {
         try {
           const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
           const found = drivers.find((item) => (item.name || "").trim() === currentUser);
-          isAdmin = Boolean(found && found.status === "관리자");
+          isAdmin = Boolean(found && found.status === "愿由ъ옄");
         } catch (error) {
           isAdmin = false;
         }
       }
-      if (isAdmin) return;
+      if (isAdmin) { document.body.classList.add("is-admin"); return; }
       const targets = document.querySelectorAll('a[href="office-work.html"]');
       targets.forEach((el) => {
         el.style.display = "none";
@@ -749,3 +756,5 @@ flex-direction: column;
   </script>
 </body>
 </html>
+
+

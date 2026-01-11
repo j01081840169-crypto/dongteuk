@@ -437,7 +437,13 @@
         margin-bottom: 8px !important;
       }
     }
-</style>
+    /* role-menu-guard */
+    body:not(.is-admin) .menu a[href="register-info.html"],
+    body:not(.is-admin) .menu a[href="dispatch-create.html"],
+    body:not(.is-admin) .menu a[href="office-work.html"] {
+      display: none !important;
+    }
+  </style>
 </head>
 <body>
   <div class="layout">
@@ -820,7 +826,8 @@
     // admin-menu-guard
     (() => {
       const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
-      let isAdmin = false;
+            const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      let isAdmin = role === "admin" || role === "관리자";
       if (currentUser) {
         try {
           const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
@@ -830,7 +837,7 @@
           isAdmin = false;
         }
       }
-      if (isAdmin) return;
+      if (isAdmin) { document.body.classList.add("is-admin"); return; }
       const targets = document.querySelectorAll(
         'a[href="register-info.html"], a[href="dispatch-create.html"], a[href="office-work.html"]'
       );
@@ -843,6 +850,8 @@
   </script>
 
 </html>
+
+
 
 
 

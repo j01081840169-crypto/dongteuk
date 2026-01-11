@@ -362,6 +362,12 @@
         min-height: 0;
       }
     }
+      /* role-menu-guard */
+    body:not(.is-admin) .menu a[href="register-info.html"],
+    body:not(.is-admin) .menu a[href="dispatch-create.html"],
+    body:not(.is-admin) .menu a[href="office-work.html"] {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
@@ -500,6 +506,7 @@
   </script>
 </body>
 </html>
+
 
 
 

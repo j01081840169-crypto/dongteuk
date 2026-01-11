@@ -65,6 +65,22 @@
     }
   };
 
+  const ensureSession = async () => {
+    try {
+      const response = await fetch("/api/session", { credentials: "include" });
+      if (!response.ok) {
+        window.location.replace("/main.html");
+        return;
+      }
+      const data = await response.json().catch(() => ({}));
+      if (!data?.ok) {
+        window.location.replace("/main.html");
+      }
+    } catch (error) {
+      window.location.replace("/main.html");
+    }
+  };
+
   const fetchData = async () => {
     try {
       const response = await fetch(`/api/data?keys=${encodeURIComponent(syncKeys.join(","))}`, {
@@ -101,4 +117,15 @@
   } else {
     run();
   }
+
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+      ensureSession().catch(() => {});
+    }
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      ensureSession().catch(() => {});
+    }
+  });
 })();

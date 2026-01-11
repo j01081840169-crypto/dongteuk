@@ -1,9 +1,9 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>(주)동특 | 공지사항 상세</title>
+  <title>(二??숉듅 | 怨듭??ы빆 ?곸꽭</title>
   <style>
     :root {
       --ink: #0e1a2b;
@@ -23,7 +23,7 @@
     body {
       margin: 0;
       min-height: 100vh;
-      font-family: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      font-family: "Malgun Gothic", "留묒? 怨좊뵓", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
       color: var(--ink);
       background:
         radial-gradient(900px 380px at 15% 0%, rgba(11, 95, 193, 0.08), transparent 65%),
@@ -327,20 +327,26 @@
         margin-bottom: 8px !important;
       }
     }
-</style>
+    /* role-menu-guard */
+    body:not(.is-admin) .menu a[href="register-info.html"],
+    body:not(.is-admin) .menu a[href="dispatch-create.html"],
+    body:not(.is-admin) .menu a[href="office-work.html"] {
+      display: none !important;
+    }
+  </style>
 </head>
 <body>
   <div class="layout">
     <aside class="sidebar">
-      <a href="second.html"><img class="logo" src="Dongteuk.png" alt="(주)동특 로고" /></a>
-      <nav class="menu" aria-label="주요 메뉴">
+      <a href="second.html"><img class="logo" src="Dongteuk.png" alt="(二??숉듅 濡쒓퀬" /></a>
+      <nav class="menu" aria-label="二쇱슂 硫붾돱">
         <a href="second.html">&#50629;&#47924;&#54788;&#54889;</a>
-        <a class="active" href="notice.html">공지사항</a>
-        <a href="dispatch.html">배차현황</a>
-        <a href="report.html">기사업무</a>
+        <a class="active" href="notice.html">怨듭??ы빆</a>
+        <a href="dispatch.html">諛곗감?꾪솴</a>
+        <a href="report.html">湲곗궗?낅Т</a>
         <a href="office-work.html">&#49324;&#47924;&#50629;&#47924;</a>
-        <a href="register-info.html">등록정보</a>
-        <a href="settings.html">설정</a>
+        <a href="register-info.html">?깅줉?뺣낫</a>
+        <a href="settings.html">?ㅼ젙</a>
       </nav>
       <div class="sidebar-footer">
         <div class="login-meta">
@@ -352,18 +358,18 @@
 
     <main class="main">
       <header class="page-header">
-        <h1>공지사항 상세</h1>
+        <h1>怨듭??ы빆 ?곸꽭</h1>
         <div class="header-actions">
-          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">로그아웃</button>
+          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">濡쒓렇?꾩썐</button>
         </div>
       </header>
 
       <section class="card">
         <div class="meta-row" id="notice-meta">-</div>
         <h2 class="title" id="notice-title">-</h2>
-        <div class="content" id="notice-content">내용을 불러올 수 없습니다.</div>
+        <div class="content" id="notice-content">?댁슜??遺덈윭?????놁뒿?덈떎.</div>
         <div class="actions">
-          <a href="#" onclick="history.back(); return false;">뒤로가기</a>
+          <a href="#" onclick="history.back(); return false;">?ㅻ줈媛湲?/a>
         </div>
       </section>
     </main>
@@ -394,10 +400,10 @@
       if (contentEl) contentEl.textContent = notice.content || "-";
       if (metaEl) {
         const parts = [];
-        if (notice.author) parts.push(`작성자 ${notice.author}`);
-        if (notice.createdAt) parts.push(`등록일 ${notice.createdAt}`);
-        parts.push(`조회 ${notice.views || 0}`);
-        metaEl.textContent = parts.join(" · ") || "-";
+        if (notice.author) parts.push(`?묒꽦??${notice.author}`);
+        if (notice.createdAt) parts.push(`?깅줉??${notice.createdAt}`);
+        parts.push(`議고쉶 ${notice.views || 0}`);
+        metaEl.textContent = parts.join(" 쨌 ") || "-";
       }
       notice.views = (notice.views || 0) + 1;
       notices[index] = notice;
@@ -444,17 +450,18 @@
     // office-menu-guard
     (() => {
       const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
-      let isAdmin = false;
+            const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      let isAdmin = role === "admin" || role === "관리자";
       if (currentUser) {
         try {
           const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
           const found = drivers.find((item) => (item.name || "").trim() === currentUser);
-          isAdmin = Boolean(found && found.status === "관리자");
+          isAdmin = Boolean(found && found.status === "愿由ъ옄");
         } catch (error) {
           isAdmin = false;
         }
       }
-      if (isAdmin) return;
+      if (isAdmin) { document.body.classList.add("is-admin"); return; }
       const targets = document.querySelectorAll('a[href="office-work.html"]');
       targets.forEach((el) => {
         el.style.display = "none";
@@ -465,3 +472,5 @@
   </script>
 </body>
 </html>
+
+

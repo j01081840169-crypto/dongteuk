@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
@@ -297,7 +297,13 @@ flex-direction: column;
         margin-bottom: 8px !important;
       }
     }
-</style>
+    /* role-menu-guard */
+    body:not(.is-admin) .menu a[href="register-info.html"],
+    body:not(.is-admin) .menu a[href="dispatch-create.html"],
+    body:not(.is-admin) .menu a[href="office-work.html"] {
+      display: none !important;
+    }
+  </style>
 </head>
 <body>
   <div class="layout">
@@ -323,7 +329,7 @@ flex-direction: column;
       <header class="page-header">
         <h1>&#44592;&#53440;&#48708;&#50857;&#52397;&#44396;</h1>
         <div class="header-actions">
-                    <button class="logout-btn" type="button" onclick="history.back()">뒤로가기</button>
+                    <button class="logout-btn" type="button" onclick="history.back()">?ㅻ줈媛湲?/button>
 <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">&#47196;&#44536;&#50500;&#50883;</button>
         </div>
       </header>
@@ -372,17 +378,18 @@ flex-direction: column;
     // office-menu-guard
     (() => {
       const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
-      let isAdmin = false;
+            const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      let isAdmin = role === "admin" || role === "관리자";
       if (currentUser) {
         try {
           const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
           const found = drivers.find((item) => (item.name || "").trim() === currentUser);
-          isAdmin = Boolean(found && found.status === "관리자");
+          isAdmin = Boolean(found && found.status === "愿由ъ옄");
         } catch (error) {
           isAdmin = false;
         }
       }
-      if (isAdmin) return;
+      if (isAdmin) { document.body.classList.add("is-admin"); return; }
       const targets = document.querySelectorAll('a[href="office-work.html"]');
       targets.forEach((el) => {
         el.style.display = "none";
@@ -393,3 +400,5 @@ flex-direction: column;
   </script>
 </body>
 </html>
+
+

@@ -63,6 +63,9 @@ app.use((req, res, next) => {
   if (!req.session?.user) {
     return res.redirect("/main.html");
   }
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
+  res.set("Pragma", "no-cache");
+  res.set("Expires", "0");
   if (adminOnlyPages.has(req.path) && req.session.user.role !== "admin") {
     return res.redirect("/second.html");
   }
