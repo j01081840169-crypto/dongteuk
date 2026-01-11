@@ -370,7 +370,7 @@
         <h1>근태조회</h1>
         <div class="header-actions">
           <button class="logout-btn" type="button" onclick="history.back()">뒤로가기</button>
-          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); location.href='main.html'">로그아웃</button>
+          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">로그아웃</button>
         </div>
       </header>
 
@@ -408,6 +408,7 @@
       </section>
     </main>
   </div>
+  <script src="data-sync.js"></script>
   <script>
     const attBody = document.getElementById("att-body");
     const attMode = document.getElementById("att-mode");

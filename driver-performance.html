@@ -362,7 +362,7 @@
         <h1>기사 실적조회</h1>
         <div class="header-actions">
           <button class="logout-btn" type="button" onclick="history.back()">뒤로가기</button>
-          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); location.href='main.html'">로그아웃</button>
+          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">로그아웃</button>
         </div>
       </header>
 
@@ -390,6 +390,7 @@
       </section>
     </main>
   </div>
+  <script src="data-sync.js"></script>
   <script>
     const scoreBody = document.getElementById("score-body");
     const yearSelect = document.getElementById("year-select");

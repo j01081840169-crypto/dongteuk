@@ -350,7 +350,7 @@
       <header class="topbar">
         <h1>&#49324;&#47924;&#50629;&#47924;</h1>
         <div class="header-actions">
-          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); location.href='main.html'">&#47196;&#44536;&#50500;&#50883;</button>
+          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">&#47196;&#44536;&#50500;&#50883;</button>
         </div>
       </header>
       <div class="quick-actions">
@@ -363,6 +363,7 @@
       </div>
     </main>
   </div>
+  <script src="data-sync.js"></script>
   <script>
     const renderLoginMeta = () => {
       const userEl = document.getElementById("login-user");

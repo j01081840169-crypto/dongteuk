@@ -481,7 +481,7 @@
       <header class="topbar">
         <h1>업무 현황 <span class="topbar-date" id="topbar-date"></span></h1>
           <div class="header-actions">
-      <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); location.href='main.html'">로그아웃</button>
+      <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">로그아웃</button>
     </div></header>
 
       <section class="grid">
@@ -540,6 +540,7 @@
       </section>
     </main>
   </div>
+  <script src="data-sync.js"></script>
   <script>
     const storageKey = "dongteukDispatches";
     const summary = document.getElementById("dispatch-summary");

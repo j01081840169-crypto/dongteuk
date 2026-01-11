@@ -537,7 +537,7 @@
       <header class="page-header">
         <h1>등록정보</h1>
         <div class="header-actions">
-          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); location.href='main.html'">로그아웃</button>
+          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">로그아웃</button>
         </div>
       </header>
 
@@ -641,6 +641,7 @@
       </div>
     </main>
   </div>
+  <script src="data-sync.js"></script>
   <script>
     const storageKeys = {
       drivers: "dongteukDrivers",

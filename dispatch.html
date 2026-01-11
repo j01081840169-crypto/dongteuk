@@ -730,7 +730,7 @@
         </div>
         <div class="header-actions">
           <button class="action-btn" type="button" id="export-image">이미지 저장</button>
-          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); location.href='main.html'">로그아웃</button>
+          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">로그아웃</button>
         </div>
       </header>
       <div id="dispatch-export">
@@ -780,6 +780,7 @@
       </div>
     </main>
   </div>
+  <script src="data-sync.js"></script>
   <script>
     const storageKey = "dongteukDispatches";
     const listBody = document.getElementById("dispatch-list");

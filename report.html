@@ -881,7 +881,7 @@
       <button class="logout-btn" type="button" id="paystub-btn" onclick="location.href='paystub.html'">월급명세서</button>
       <button class="logout-btn" type="button" id="meal-claim-btn" onclick="location.href='meal-claim.html'">식대청구</button>
       <button class="logout-btn" type="button" id="extra-claim-btn" onclick="location.href='extra-claim.html'">기타비용청구</button>
-      <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); location.href='main.html'">로그아웃</button>
+      <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">로그아웃</button>
     </div></header>
 
       <section class="card work-card">
@@ -1020,6 +1020,7 @@
       </section>
     </main>
   </div>
+  <script src="data-sync.js"></script>
   <script>
     const byId = (id) => document.getElementById(id);
     const workDate = byId("work-date");

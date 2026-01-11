@@ -473,7 +473,7 @@ flex-direction: column;
         <div class="header-actions">
           <button class="action-btn" type="button" onclick="location.href='paystub-create.html'">등록</button>
           <button class="logout-btn" type="button" onclick="history.back()">뒤로가기</button>
-          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); location.href='main.html'">&#47196;&#44536;&#50500;&#50883;</button>
+          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">&#47196;&#44536;&#50500;&#50883;</button>
         </div>
       </header>
       <section class="card">
@@ -504,6 +504,7 @@ flex-direction: column;
       </div>
     </div>
   </div>
+  <script src="data-sync.js"></script>
   <script>
     const paystubList = document.getElementById("paystub-list");
     const paystubMeta = document.getElementById("paystub-meta");

@@ -392,7 +392,7 @@
       <header class="page-header">
         <h1>공지사항 작성</h1>
         <div class="header-actions">
-          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); location.href='main.html'">로그아웃</button>
+          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">로그아웃</button>
         </div>
       </header>
 
@@ -415,6 +415,7 @@
       </section>
     </main>
   </div>
+  <script src="data-sync.js"></script>
   <script>
     const enforceAdminAccess = () => {
       const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();

@@ -526,7 +526,7 @@ flex-direction: column;
         <h1>&#52397;&#44396;&#51312;&#54924;</h1>
         <div class="header-actions">
                     <button class="logout-btn" type="button" onclick="history.back()">뒤로가기</button>
-<button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); location.href='main.html'">&#47196;&#44536;&#50500;&#50883;</button>
+<button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">&#47196;&#44536;&#50500;&#50883;</button>
         </div>
       </header>
       <div class="filter-bar">
@@ -554,6 +554,7 @@ flex-direction: column;
       </section>
     </main>
   </div>
+  <script src="data-sync.js"></script>
   <script>
     let cachedClaims = [];
     let filteredClaims = [];

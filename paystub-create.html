@@ -473,7 +473,7 @@
         <h1>월급명세서 등록</h1>
         <div class="header-actions">
           <button class="logout-btn" type="button" onclick="history.back()">뒤로가기</button>
-          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); location.href='main.html'">로그아웃</button>
+          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">로그아웃</button>
         </div>
       </header>
 
@@ -499,6 +499,7 @@
       </section>
     </main>
   </div>
+  <script src="data-sync.js"></script>
   <script>
     const payYear = document.getElementById("pay-year");
     const payMonth = document.getElementById("pay-month");

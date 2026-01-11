@@ -464,7 +464,7 @@
       <header class="page-header">
         <h1>설정</h1>
           <div class="header-actions">
-      <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); location.href='main.html'">로그아웃</button>
+      <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">로그아웃</button>
     </div></header>
 
       <section class="grid">
@@ -472,7 +472,7 @@
           <h2>비밀번호 변경</h2>
           <div class="form-field">
             <label for="pw-name">이름 (아이디)</label>
-            <input id="pw-name" type="text" placeholder="이름 입력" />
+            <input id="pw-name" type="text" placeholder="현재 로그인 계정" readonly />
           </div>
           <div class="form-field">
             <label for="pw-current">현재 비밀번호</label>
@@ -486,7 +486,7 @@
             <label for="pw-confirm">새 비밀번호 확인</label>
             <input id="pw-confirm" type="password" placeholder="새 비밀번호 확인" />
           </div>
-          <div class="form-hint">아이디는 이름, 초기 비밀번호는 0000입니다.</div>
+          <div class="form-hint">로그인 계정의 비밀번호를 변경합니다.</div>
           <div class="form-result" id="pw-result"></div>
           <div class="actions">
             <button class="ghost" type="button" id="pw-reset">입력 초기화</button>
@@ -537,6 +537,7 @@
       </section>
     </main>
   </div>
+  <script src="data-sync.js"></script>
   <script>
     const byId = (id) => document.getElementById(id);
     const nameInput = byId("pw-name");
@@ -559,6 +560,23 @@
     const signatureRemoveBtn = byId("signature-remove");
     const signatureSaveBtn = byId("signature-save");
 
+    const loadSessionUser = async () => {
+      let name = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+      if (!name) {
+        try {
+          const response = await fetch("/api/session", { credentials: "include" });
+          const data = await response.json().catch(() => ({}));
+          if (response.ok && data.user?.username) {
+            name = data.user.username;
+          }
+        } catch (error) {
+        }
+      }
+      if (nameInput) {
+        nameInput.value = name;
+      }
+    };
+
     const normalizeDigits = (value) => (value || "").replace(/\D/g, "");
     const getLastFour = (value) => normalizeDigits(value).slice(-4);
     const formatPhone = (value) => {
@@ -578,18 +596,6 @@
       } catch (error) {
         return [];
       }
-    };
-
-    const readPasswords = () => {
-      try {
-        return JSON.parse(localStorage.getItem("dongteukPasswords") || "{}");
-      } catch (error) {
-        return {};
-      }
-    };
-
-    const writePasswords = (passwords) => {
-      localStorage.setItem("dongteukPasswords", JSON.stringify(passwords));
     };
 
     const setResult = (message, type) => {
@@ -656,13 +662,12 @@
     }
 
     if (saveBtn) {
-      saveBtn.addEventListener("click", () => {
-        const username = (nameInput?.value || "").trim();
+      saveBtn.addEventListener("click", async () => {
         const current = (currentInput?.value || "").trim();
         const next = (newInput?.value || "").trim();
         const confirm = (confirmInput?.value || "").trim();
 
-        if (!username || !current || !next || !confirm) {
+        if (!current || !next || !confirm) {
           setResult("모든 항목을 입력해 주세요.", "error");
           return;
         }
@@ -670,23 +675,25 @@
           setResult("새 비밀번호가 일치하지 않습니다.", "error");
           return;
         }
-        const drivers = readDrivers();
-        const driver = drivers.find((item) => (item.name || "").trim() === username);
-        if (!driver) {
-          setResult("이름(아이디)을 확인해 주세요.", "error");
-          return;
+        try {
+          const response = await fetch("/api/password", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ current, next }),
+            credentials: "include"
+          });
+          const data = await response.json().catch(() => ({}));
+          if (response.ok && data.ok) {
+            setResult("비밀번호가 변경되었습니다.", "success");
+            if (currentInput) currentInput.value = "";
+            if (newInput) newInput.value = "";
+            if (confirmInput) confirmInput.value = "";
+            return;
+          }
+          setResult(data.message || "관리자에게 문의하세요.", "error");
+        } catch (error) {
+          setResult("관리자에게 문의하세요.", "error");
         }
-        const passwords = readPasswords();
-        const stored = passwords[username];
-        const baseMatch = current === "0000";
-        const match = stored ? current === stored : baseMatch;
-        if (!match) {
-          setResult("현재 비밀번호가 올바르지 않습니다.", "error");
-          return;
-        }
-        passwords[username] = next;
-        writePasswords(passwords);
-        setResult("비밀번호가 변경되었습니다.", "success");
       });
     }
 
@@ -775,6 +782,7 @@
     }
 
     loadSignaturePreview();
+    loadSessionUser();
   
     const renderLoginMeta = () => {
       const userEl = document.getElementById("login-user");

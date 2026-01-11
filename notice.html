@@ -461,7 +461,7 @@
       <button class="action-btn" type="button" id="notice-write" onclick="location.href='notice-create.html'">글쓰기</button>
       <button class="action-btn" type="button" id="notice-clear">전체 삭제</button>
       <button class="action-btn" type="button" id="notice-delete-selected">선택 삭제</button>
-      <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); location.href='main.html'">로그아웃</button>
+      <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">로그아웃</button>
     </div></header>
 
       <section class="card">
@@ -484,6 +484,7 @@
       </section>
     </main>
   </div>
+  <script src="data-sync.js"></script>
   <script>
     const noticeBody = document.getElementById("notice-body");
     const noticeClear = document.getElementById("notice-clear");

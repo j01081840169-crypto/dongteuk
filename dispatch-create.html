@@ -630,7 +630,7 @@
         <h1>배차등록</h1>
           <div class="header-actions">
       <button class="logout-btn" type="button" onclick="history.back()">뒤로가기</button>
-      <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); location.href='main.html'">로그아웃</button>
+      <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">로그아웃</button>
     </div></header>
 
       <section class="card">
@@ -723,6 +723,7 @@
       <option value="#c2252a">빨강</option>
     </select>
   </div>
+  <script src="data-sync.js"></script>
   <script>
     const columns = [
       "product",

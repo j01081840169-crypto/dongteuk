@@ -453,7 +453,7 @@ flex-direction: column;
         <h1>&#49885;&#45824;&#52397;&#44396;</h1>
         <div class="header-actions">
                     <button class="logout-btn" type="button" onclick="history.back()">뒤로가기</button>
-<button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); location.href='main.html'">&#47196;&#44536;&#50500;&#50883;</button>
+<button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">&#47196;&#44536;&#50500;&#50883;</button>
         </div>
       </header>
       <section class="card">
@@ -477,6 +477,7 @@ flex-direction: column;
       </section>
     </main>
   </div>
+  <script src="data-sync.js"></script>
   <script>
     const storageKeyCandidates = ["dongteukWork", "dongteukWorkReports", "dongteukWorkData"];
     const storageKey =
