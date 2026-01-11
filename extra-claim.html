@@ -297,16 +297,7 @@ flex-direction: column;
         margin-bottom: 8px !important;
       }
     }
-    /* role-menu-guard */
-    html:not(.is-admin) .menu a,
-    body:not(.is-admin) .menu a[href="/register-info"],
-    html:not(.is-admin) .menu a,
-    body:not(.is-admin) .menu a[href="/dispatch-create"],
-    html:not(.is-admin) .menu a,
-    body:not(.is-admin) .menu a[href="/office-work"] {
-      display: none !important;
-    }
-      /* logo-layout-lock */
+    /* logo-layout-lock */
     .logo {
       width: 100px;
       height: 24px;
@@ -321,116 +312,10 @@ flex-direction: column;
       }
     }
   </style>
-  <script>
-    // admin-class-boot
-    (() => {
-      const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
-      if (role === "admin" || role === "관리자") {
-        document.documentElement.classList.add("is-admin");
-        document.addEventListener("DOMContentLoaded", () => {
-          document.documentElement.classList.add("is-admin");
-        document.body.classList.add("is-admin");
-        });
-      }
-    })();
-  </script>
-</head>
-<body>
-  <div class="layout">
-    <aside class="sidebar">
-      <a href="/second"><img class="logo" width="100" height="24" src="Dongteuk.png" alt="(&#51452;&#46041;&#53945;&#32;&#47196;&#44256;)" /></a>
-      <nav class="menu" aria-label="&#51452;&#50836;&#32;&#47700;&#45684;">
-        <a href="/second">&#50629;&#47924;&#54788;&#54889;</a>
-        <a href="/notice">&#44277;&#51648;&#49324;&#54637;</a>
-        <a href="/dispatch">&#48176;&#52264;&#54788;&#54889;</a>
-        <a href="/report">&#44592;&#49324;&#50629;&#47924;</a>
-        <a href="/office-work">&#49324;&#47924;&#50629;&#47924;</a>
-        <a href="/register-info">&#46321;&#47197;&#51221;&#48372;</a>
-        <a href="/settings">&#49444;&#51221;</a>
-      </nav>
-      <div class="sidebar-footer">
-        <div class="login-meta">
-          <span id="login-user">-</span>
-          <span id="login-time">-</span>
-        </div>
-      </div>
-    </aside>
-    <main class="main">
-      <header class="page-header">
-        <h1>&#44592;&#53440;&#48708;&#50857;&#52397;&#44396;</h1>
-        <div class="header-actions">
-                    <button class="logout-btn" type="button" onclick="history.back()">?ㅻ줈媛湲?/button>
-<button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">&#47196;&#44536;&#50500;&#50883;</button>
-        </div>
-      </header>
-      <section class="card">
-        <h2>&#44592;&#53440;&#48708;&#50857;&#52397;&#44396;</h2>
-        <p>&#44592;&#53440;&#48708;&#50857;&#52397;&#44396;&#32;&#44592;&#45733;&#51012;&#32;&#51456;&#48708;&#32;&#51473;&#51077;&#45768;&#45796;&#46;</p>
-      </section>
-    </main>
-  </div>
-  <script src="data-sync.js"></script>
-  <script>
-    const renderLoginMeta = () => {
-      const userEl = document.getElementById("login-user");
-      const timeEl = document.getElementById("login-time");
-      if (!userEl || !timeEl) return;
-
-      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
-      let displayName = currentUser || "-";
-      let displayTitle = "";
-      try {
-        const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
-        const found = drivers.find((item) => (item.name || "").trim() === currentUser);
-        if (found) {
-          displayName = found.name || displayName;
-          displayTitle = found.title || "";
-        }
-      } catch (error) {
-      }
-      const titleText = displayTitle ? ` ${displayTitle}` : "";
-      userEl.textContent = `${displayName}${titleText}`;
-
-      const now = new Date();
-      const yyyy = now.getFullYear();
-      const mm = String(now.getMonth() + 1).padStart(2, "0");
-      const dd = String(now.getDate()).padStart(2, "0");
-      const hh = String(now.getHours()).padStart(2, "0");
-      const min = String(now.getMinutes()).padStart(2, "0");
-      const ss = String(now.getSeconds()).padStart(2, "0");
-      timeEl.textContent = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
-    };
-
-    renderLoginMeta();
-    setInterval(renderLoginMeta, 1000);
-  </script>
-  <script>
-    // office-menu-guard
-    (() => {
-      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
-            const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
-      let isAdmin = role === "admin" || role === "관리자";
-      if (currentUser) {
-        try {
-          const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
-          const found = drivers.find((item) => (item.name || "").trim() === currentUser);
-          isAdmin = Boolean(found && found.status === "愿由ъ옄");
-        } catch (error) {
-          isAdmin = false;
-        }
-      }
-      if (isAdmin) { document.documentElement.classList.add("is-admin");
-        document.body.classList.add("is-admin"); return; }
-      const targets = document.querySelectorAll('a[href="/office-work"]');
-      targets.forEach((el) => {
-        el.style.display = "none";
-        el.setAttribute("aria-hidden", "true");
-        el.tabIndex = -1;
-      });
-    })();
-  </script>
+  
 </body>
 </html>
+
 
 
 
