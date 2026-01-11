@@ -1,0 +1,775 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>(주)동특 | 월급명세서 등록</title>
+  <style>
+    :root {
+      --ink: #0e1a2b;
+      --deep: #0f223d;
+      --accent: #0b5fc1;
+      --paper: #ffffff;
+      --mist: #f4f6f9;
+      --card: #ffffff;
+      --line: rgba(15, 23, 42, 0.08);
+      --shadow: 0 20px 50px rgba(12, 24, 42, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 380px at 15% 0%, rgba(11, 95, 193, 0.08), transparent 65%),
+        radial-gradient(700px 340px at 92% 5%, rgba(11, 95, 193, 0.08), transparent 60%),
+        linear-gradient(180deg, #fbfbfd 0%, #f2f4f8 55%, #edf1f6 100%);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 120px;
+      background: #ffffff;
+      border-right: 1px solid var(--line);
+      padding: 10px 6px 8px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo {
+      width: 100px;
+      height: auto;
+      display: block;
+      margin-bottom: 24px;
+    }
+
+    .menu {
+      margin-top: 16px;
+      display: grid;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .menu a {
+      height: 36px;
+      line-height: 36px;
+      text-align: center;
+      text-decoration: none;
+      color: var(--deep);
+      padding: 0 10px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(15, 23, 42, 0.2);
+      transition: background 150ms ease, border 150ms ease;
+    }
+
+    .menu a.active {
+      background: rgba(11, 95, 193, 0.08);
+      border-color: rgba(11, 95, 193, 0.2);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .menu a:hover {
+      background: rgba(15, 23, 42, 0.04);
+      border-color: rgba(15, 23, 42, 0.06);
+    }
+
+    .main {
+      padding: 28px 32px 40px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 24px;
+      background: var(--accent);
+      color: #ffffff;
+      padding: 8px 18px;
+      border-radius: 20px;
+      min-height: 65px;
+      height: 65px;
+    }
+
+    .page-header h1 {
+      margin: 0;
+      font-size: 22px;
+      color: #ffffff;
+    }
+
+    .header-actions {
+      display: inline-flex;
+      gap: 8px;
+    }
+
+    .logout-btn {
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 12px 26px rgba(11, 95, 193, 0.08);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .field {
+      grid-column: span 12;
+      display: grid;
+      gap: 6px;
+    }
+
+    .field.half {
+      grid-column: span 6;
+    }
+
+    .field label {
+      font-size: 12px;
+      color: rgba(14, 26, 43, 0.6);
+    }
+
+    .field input,
+    .field select {
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 20px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-family: inherit;
+      width: 100%;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .actions button,
+    .actions a {
+      border: none;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .primary {
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 10px 24px rgba(11, 95, 193, 0.25);
+    }
+
+    .ghost {
+      background: rgba(15, 23, 42, 0.06);
+      color: var(--deep);
+    }
+
+    .meta {
+      font-size: 12px;
+      color: rgba(14, 26, 43, 0.6);
+      margin-top: 10px;
+    }
+
+    .driver-list {
+      margin-top: 14px;
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+      display: grid;
+      gap: 6px;
+      grid-template-columns: 1fr;
+      font-size: 12px;
+      color: rgba(14, 26, 43, 0.7);
+    }
+
+    .driver-list strong {
+      grid-column: 1 / -1;
+      font-size: 12px;
+      color: var(--deep);
+    }
+
+    .driver-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 10px;
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 14px;
+      background: #fbfcfe;
+    }
+
+    .driver-item span {
+      font-weight: 600;
+      color: var(--deep);
+      white-space: nowrap;
+    }
+
+    .driver-file {
+      font-size: 12px;
+      color: rgba(14, 26, 43, 0.7);
+      white-space: nowrap;
+    }
+
+    .driver-status {
+      font-size: 11px;
+      font-weight: 700;
+      color: #1f7a54;
+      background: rgba(46, 170, 120, 0.12);
+      border-radius: 999px;
+      padding: 3px 8px;
+      white-space: nowrap;
+    }
+
+    .driver-status.pending {
+      color: #b1261d;
+      background: rgba(239, 65, 54, 0.12);
+    }
+
+    .driver-item input[type="file"] {
+      font-size: 12px;
+    }
+
+    .driver-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .recall-btn {
+      border: 1px solid rgba(15, 23, 42, 0.2);
+      background: #ffffff;
+      color: #b1261d;
+      border-radius: 14px;
+      padding: 4px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .recall-btn:hover {
+      background: rgba(239, 65, 54, 0.08);
+      border-color: rgba(239, 65, 54, 0.2);
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 120px 1fr;
+      }
+
+      .main {
+        padding: 22px 18px 32px;
+      }
+
+      .field.half {
+        grid-column: span 12;
+      }
+    }
+  
+    /* Mobile layout */
+    @media (max-width: 720px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        overflow-x: hidden;
+        padding: 10px;
+        flex-wrap: wrap;
+      }
+
+      .sidebar-footer {
+        display: none;
+      }
+
+      .logo {
+        width: 80px;
+        margin: 0 8px 0 0;
+      }
+
+      .menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .menu a {
+        white-space: nowrap;
+        font-size: 12px;
+        height: 32px;
+      }
+
+      .main {
+        padding: 18px 14px 28px;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .card {
+        border-radius: 16px;
+        padding: 14px;
+      }
+
+      .page-header,
+      .topbar {
+        flex-wrap: wrap;
+        gap: 10px;
+        height: auto;
+        min-height: 0;
+      }
+    }
+  
+    
+    
+    /* Unified mobile sidebar menu */
+    @media (max-width: 720px) {
+      .layout {
+        display: flex !important;
+        flex-direction: column !important;
+        min-height: 0 !important;
+        width: 100% !important;
+      }
+
+      .sidebar {
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        position: static !important;
+        top: auto !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        gap: 4px !important;
+        overflow-x: hidden !important;
+        padding: 6px !important;
+        flex-wrap: wrap !important;
+      }
+
+      .sidebar-footer {
+        display: none !important;
+      }
+
+      .logo {
+        width: 54px !important;
+        margin: 0 !important;
+      }
+
+      .menu {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 2px !important;
+        margin-top: 2px !important;
+        width: 100% !important;
+        flex: 0 0 auto !important;
+        align-content: start !important;
+        grid-auto-rows: 18px !important;
+      }
+
+      .menu a {
+        white-space: normal !important;
+        font-size: 8px !important;
+        height: 18px !important;
+        line-height: 1 !important;
+        padding: 0 1px !important;
+        border-radius: 8px !important;
+      }
+
+      .main {
+        width: 100% !important;
+        padding: 6px 8px 12px !important;
+      }
+
+      .page-header,
+      .topbar {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        height: auto !important;
+        min-height: 0 !important;
+        padding: 6px 12px !important;
+      }
+
+      .page-header {
+        margin-bottom: 8px !important;
+      }
+
+      .controls {
+        margin-bottom: 8px !important;
+      }
+    }
+</style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="second.html"><img class="logo" src="Dongteuk.png" alt="(주)동특 로고" /></a>
+      <nav class="menu" aria-label="주요 메뉴">
+        <a href="second.html">&#50629;&#47924;&#54788;&#54889;</a>
+        <a href="notice.html">공지사항</a>
+        <a href="dispatch.html">배차현황</a>
+        <a href="report.html">기사업무</a>
+        <a class="active" href="office-work.html">&#49324;&#47924;&#50629;&#47924;</a>
+        <a href="register-info.html">등록정보</a>
+        <a href="settings.html">설정</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="login-meta">
+          <span id="login-user">-</span>
+          <span id="login-time">-</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="page-header">
+        <h1>월급명세서 등록</h1>
+        <div class="header-actions">
+          <button class="logout-btn" type="button" onclick="history.back()">뒤로가기</button>
+          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); location.href='main.html'">로그아웃</button>
+        </div>
+      </header>
+
+      <section class="card">
+        <div class="form-grid">
+          <div class="field half">
+            <label for="pay-year">년</label>
+            <select id="pay-year"></select>
+          </div>
+          <div class="field half">
+            <label for="pay-month">월</label>
+            <select id="pay-month"></select>
+          </div>
+        </div>
+        <div class="meta">등록된 월급명세서는 `paystub.html`에서 확인할 수 있습니다.</div>
+        <div class="driver-list" id="driver-list">
+          <strong>기사 목록</strong>
+        </div>
+        <div class="actions">
+          <button class="ghost" type="button" onclick="history.back()">뒤로가기</button>
+          <button class="primary" type="button" id="pay-save">등록</button>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script>
+    const payYear = document.getElementById("pay-year");
+    const payMonth = document.getElementById("pay-month");
+    const paySave = document.getElementById("pay-save");
+    const driverList = document.getElementById("driver-list");
+    const driverFiles = new Map();
+
+    const readDrivers = () => {
+      try {
+        const raw = localStorage.getItem("dongteukDrivers") || "[]";
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed)
+          ? parsed.filter((item) => item.status !== "관리자")
+          : [];
+      } catch (error) {
+        return [];
+      }
+    };
+
+    const readPaystubs = () => {
+      try {
+        const raw = localStorage.getItem("dongteukPaystubs") || "[]";
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    };
+
+    const initSelectors = () => {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const years = [];
+      for (let y = currentYear - 2; y <= currentYear + 1; y += 1) {
+        years.push(y);
+      }
+      payYear.innerHTML = years.map((y) => `<option value="${y}">${y}년</option>`).join("");
+      const months = Array.from({ length: 12 }, (_, i) => i + 1);
+      payMonth.innerHTML = months
+        .map((m) => `<option value="${String(m).padStart(2, "0")}">${m}월</option>`)
+        .join("");
+      payYear.value = String(currentYear);
+      payMonth.value = String(now.getMonth() + 1).padStart(2, "0");
+    };
+
+    const renderDriverList = () => {
+      const year = payYear.value;
+      const month = payMonth.value;
+      const drivers = readDrivers()
+        .map((item) => ({
+          name: item.name,
+          title: item.title,
+        }))
+        .filter((item) => item.name);
+      const registered = readPaystubs()
+        .filter((item) => item.year === year && item.month === month)
+        .reduce((map, item) => {
+          if (item.driver) {
+            map[item.driver] = item.fileName || "등록됨";
+          }
+          return map;
+        }, {});
+      if (driverList) {
+        if (!drivers.length) {
+          driverList.innerHTML = "<strong>기사 목록</strong><div>등록된 기사가 없습니다.</div>";
+          return;
+        }
+        driverList.innerHTML =
+          "<strong>기사 목록</strong>" +
+          drivers
+            .map((driver) => {
+              const title = driver.title ? ` (${driver.title})` : "";
+              const registeredLabel = registered[driver.name];
+              const registeredText = registeredLabel
+                ? `<span class="driver-file">${registeredLabel}</span>`
+                : "<span class=\"driver-file\"></span>";
+              const statusText = registeredLabel
+                ? "<span class=\"driver-status\">&#46321;&#47197;&#50756;&#47308;</span>"
+                : "<span class=\"driver-status pending\">&#46321;&#47197;&#51204;</span>";
+              return `
+                <div class="driver-item" data-driver="${driver.name}">
+                  <span>${driver.name}${title}</span>
+                  <div class="driver-actions">
+                    ${registeredText}
+                    ${statusText}
+                    <input type="file" accept=".pdf,image/*" data-driver="${driver.name}" />
+                    <button class="recall-btn" type="button" data-driver="${driver.name}">회수하기</button>
+                  </div>
+                </div>
+              `;
+            })
+            .join("");
+      }
+    };
+
+    initSelectors();
+    renderDriverList();
+
+    payYear.addEventListener("change", () => {
+      driverFiles.clear();
+      renderDriverList();
+    });
+    payMonth.addEventListener("change", () => {
+      driverFiles.clear();
+      renderDriverList();
+    });
+
+    if (driverList) {
+      const resetRowState = (row, name) => {
+        const statusEl = row?.querySelector(".driver-status");
+        const fileEl = row?.querySelector(".driver-file");
+        const inputEl = row?.querySelector('input[type="file"]');
+        if (fileEl) {
+          fileEl.textContent = "";
+        }
+        if (statusEl) {
+          statusEl.textContent = "\uB4F1\uB85D\uC804";
+          statusEl.classList.add("pending");
+        }
+        if (inputEl instanceof HTMLInputElement) {
+          inputEl.value = "";
+        }
+        if (name) {
+          driverFiles.delete(name);
+        }
+      };
+
+      driverList.addEventListener("change", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLInputElement)) return;
+        if (target.type !== "file") return;
+        const name = target.dataset.driver || "";
+        const file = target.files ? target.files[0] : null;
+        if (!name) return;
+        const row = target.closest(".driver-item");
+        if (!file) {
+          resetRowState(row, name);
+          return;
+        }
+        driverFiles.set(name, file);
+        const statusEl = row?.querySelector(".driver-status");
+        const fileEl = row?.querySelector(".driver-file");
+        if (fileEl) {
+          fileEl.textContent = file.name;
+        }
+        if (statusEl) {
+          statusEl.textContent = "\uB4F1\uB85D\uC644\uB8CC";
+          statusEl.classList.remove("pending");
+        }
+      });
+
+      driverList.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLButtonElement)) return;
+        if (!target.classList.contains("recall-btn")) return;
+        const name = target.dataset.driver || "";
+        const year = payYear.value;
+        const month = payMonth.value;
+        if (name && year && month) {
+          const list = readPaystubs();
+          const next = list.filter(
+            (item) => !(item.driver === name && item.year === year && item.month === month)
+          );
+          if (next.length !== list.length) {
+            localStorage.setItem("dongteukPaystubs", JSON.stringify(next));
+          }
+        }
+        const row = target.closest(".driver-item");
+        resetRowState(row, name);
+        renderDriverList();
+      });
+    }
+
+    if (paySave) {
+      paySave.addEventListener("click", () => {
+        const year = payYear.value;
+        const month = payMonth.value;
+        if (!year || !month) {
+          alert("년/월을 선택해 주세요.");
+          return;
+        }
+        const entries = Array.from(driverFiles.entries());
+        if (!entries.length) {
+          alert("기사별 명세서 파일을 첨부해 주세요.");
+          return;
+        }
+        const readers = entries.map(([driver, file]) => new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve({
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            year,
+            month,
+            driver,
+            fileName: file.name,
+            fileType: file.type || "",
+            fileData: reader.result || "",
+            createdAt: new Date().toISOString().slice(0, 10),
+          });
+          reader.onerror = () => reject(new Error("file"));
+          reader.readAsDataURL(file);
+        }));
+        Promise.all(readers)
+          .then((items) => {
+            const list = readPaystubs();
+            items.forEach((item) => list.unshift(item));
+            localStorage.setItem("dongteukPaystubs", JSON.stringify(list));
+            alert("등록완료");
+            driverFiles.clear();
+            renderDriverList();
+          })
+          .catch(() => {
+            alert("파일을 읽을 수 없습니다. 다시 시도해 주세요.");
+          });
+      });
+    }
+
+    const renderLoginMeta = () => {
+      const userEl = document.getElementById("login-user");
+      const timeEl = document.getElementById("login-time");
+      if (!userEl || !timeEl) return;
+
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+      let displayName = currentUser || "-";
+      let displayTitle = "";
+      try {
+        const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+        const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+        if (found) {
+          displayName = found.name || displayName;
+          displayTitle = found.title || "";
+        }
+      } catch (error) {
+      }
+      const titleText = displayTitle ? ` ${displayTitle}` : "";
+      userEl.textContent = `${displayName}${titleText}`;
+
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const hh = String(now.getHours()).padStart(2, "0");
+      const min = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      timeEl.textContent = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+    };
+
+    renderLoginMeta();
+    setInterval(renderLoginMeta, 1000);
+  </script>
+  <script>
+    // office-menu-guard
+    (() => {
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+      let isAdmin = false;
+      if (currentUser) {
+        try {
+          const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+          const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+          isAdmin = Boolean(found && found.status === "관리자");
+        } catch (error) {
+          isAdmin = false;
+        }
+      }
+      if (isAdmin) return;
+      const targets = document.querySelectorAll('a[href="office-work.html"]');
+      targets.forEach((el) => {
+        el.style.display = "none";
+        el.setAttribute("aria-hidden", "true");
+        el.tabIndex = -1;
+      });
+    })();
+  </script>
+</body>
+</html>

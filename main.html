@@ -1,0 +1,579 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>(주)동특 | 로그인</title>
+  <style>
+    :root {
+      --ink: #0e1a2b;
+      --deep: #14233b;
+      --accent: #0b5fc1;
+      --accent-2: #5aa7e6;
+      --paper: #f7f2e8;
+      --mist: rgba(255, 255, 255, 0.65);
+      --shadow: 0 30px 80px rgba(10, 18, 30, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 360px at 12% 0%, rgba(0, 94, 184, 0.08), transparent 65%),
+        radial-gradient(800px 360px at 90% 10%, rgba(11, 95, 193, 0.08), transparent 60%),
+        linear-gradient(180deg, #fbfbfd 0%, #f3f5f8 55%, #eef1f5 100%);
+      display: grid;
+      place-items: center;
+      padding: 32px 20px 40px;
+      position: relative;
+    }
+
+    .shell {
+      width: min(980px, 100%);
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) minmax(320px, 1fr);
+      gap: 32px;
+      align-items: stretch;
+      margin-top: 70px;
+    }
+
+    .brand {
+      background: rgba(20, 35, 59, 0.95);
+      color: #fdf9f1;
+      padding: 40px;
+      border-radius: 26px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .brand::before {
+      content: "";
+      position: absolute;
+      width: 360px;
+      height: 360px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(11, 95, 193, 0.5), rgba(11, 95, 193, 0) 70%);
+      top: -140px;
+      right: -120px;
+    }
+
+    .brand::after {
+      content: "";
+      position: absolute;
+      width: 240px;
+      height: 240px;
+      border-radius: 20% 60% 40% 60%;
+      background: rgba(90, 167, 230, 0.35);
+      bottom: -120px;
+      left: -90px;
+      filter: blur(4px);
+    }
+
+    .brand h1 {
+      margin: 0 0 10px;
+      font-size: clamp(28px, 3vw, 40px);
+      letter-spacing: 0.04em;
+    }
+
+    .brand p {
+      margin: 0 0 24px;
+      font-size: 15px;
+      line-height: 1.7;
+      color: rgba(253, 249, 241, 0.8);
+    }
+
+    .brand     .badge span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: inline-block;
+    }
+
+    .page-header {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: #ffffff;
+      border-radius: 14px;
+      box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
+      border: 1px solid rgba(15, 23, 42, 0.06);
+    }
+
+    .page-logo {
+      width: 160px;
+      height: auto;
+      display: block;
+    }
+
+    .login {
+      background: var(--mist);
+      backdrop-filter: blur(16px);
+      border-radius: 26px;
+      padding: 36px 34px 32px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      animation: float-in 600ms ease-out;
+    }
+
+    .login h2 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+
+    .login p {
+      margin: 0 0 28px;
+      font-size: 14px;
+      color: rgba(14, 26, 43, 0.7);
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    label {
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: rgba(14, 26, 43, 0.7);
+    }
+
+    input {
+      height: 46px;
+      border-radius: 12px;
+      border: 1px solid rgba(14, 26, 43, 0.15);
+      padding: 0 14px;
+      font-size: 15px;
+      background: rgba(255, 255, 255, 0.9);
+      transition: border 200ms ease, box-shadow 200ms ease;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: rgba(11, 95, 193, 0.5);
+      box-shadow: 0 0 0 3px rgba(11, 95, 193, 0.2);
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 4px;
+      gap: 16px;
+    }
+
+    .remember-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin: 4px 0;
+    }
+
+    .remember-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      text-transform: none;
+      color: rgba(14, 26, 43, 0.7);
+    }
+
+    .remember-item input {
+      margin: 0;
+    }
+
+    .actions a {
+      font-size: 13px;
+      color: var(--deep);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(14, 26, 43, 0.3);
+    }
+
+    .login button {
+      height: 48px;
+      border-radius: 999px;
+      border: none;
+      padding: 0 26px;
+      background: linear-gradient(135deg, var(--accent) 0%, #6fb2f0 100%);
+      color: #22170b;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(11, 95, 193, 0.3);
+      transition: transform 150ms ease, box-shadow 150ms ease;
+    }
+
+    .login button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(11, 95, 193, 0.4);
+    }
+
+    .meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 24px;
+      font-size: 12px;
+      color: rgba(14, 26, 43, 0.55);
+    }
+
+    .meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .meta span::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-2);
+    }
+
+    .form-error {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(239, 65, 54, 0.12);
+      color: #8b1d16;
+      font-size: 13px;
+    }
+    @keyframes float-in {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 860px) {
+      .shell {
+        grid-template-columns: 1fr;
+        margin-top: 0;
+      }
+
+      .brand {
+        padding: 32px;
+      }
+
+      .login {
+        padding: 30px 26px;
+      }
+
+      .page-header {
+        position: static;
+        margin-bottom: 18px;
+        justify-self: start;
+      }
+    }
+    /* Pebble header */
+    .page-header {
+      background: #ffffff;
+      color: var(--ink);
+      padding: 16px 22px;
+      border-radius: 999px;
+      box-shadow: 0 12px 24px rgba(11, 95, 193, 0.18);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .page-header h1 {
+      color: var(--ink);
+    }
+  
+    /* Mobile layout */
+    @media (max-width: 720px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        overflow-x: hidden;
+        padding: 10px;
+        flex-wrap: wrap;
+      }
+
+      .sidebar-footer {
+        display: none;
+      }
+
+      .logo {
+        width: 80px;
+        margin: 0 8px 0 0;
+      }
+
+      .menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .menu a {
+        white-space: nowrap;
+        font-size: 12px;
+        height: 32px;
+      }
+
+      .main {
+        padding: 18px 14px 28px;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .card {
+        border-radius: 16px;
+        padding: 14px;
+      }
+
+      .page-header,
+      .topbar {
+        flex-wrap: wrap;
+        gap: 10px;
+        height: auto;
+        min-height: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="page-header" aria-label="회사 로고">
+    <img class="page-logo" src="Dongteuk.png" alt="(주)동특 로고" />
+  </header>
+  <main class="shell">
+    <section class="brand">
+      <div class="badge"><span></span> Dongteuk Portal</div>
+      <h1>(주)동특 천안터미널</h1>
+      <p>
+        1977년 설립 이래로 지속적인 성장을 거듭하여 현재 최첨단종합물류회사로 발전해 왔으며
+        선진화된 국제물류업무(International FreightForwarder)의 도입으로 좀더 친숙한 회사,
+        고객이 감동할 수 있게 고객의 욕구를 먼저 생각하는 회사가 되고자 합니다.
+      </p>
+      <p>
+        동특 천안터미널 포털 접근은 승인이 필요합니다.
+      </p>
+    </section>
+
+    <section class="login" aria-label="로그인">
+      <h2>포털 로그인</h2>
+      <p>회사 계정으로 안전하게 접속하세요.</p>
+
+      <form id="login-form" action="/login" method="post">
+        <div class="field">
+          <label for="user-id">아이디</label>
+          <input id="user-id" name="username" type="text" placeholder="아이디를 입력하세요" autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label for="user-pass">비밀번호</label>
+          <input id="user-pass" name="password" type="password" placeholder="비밀번호를 입력하세요" autocomplete="current-password" required />
+        </div>
+        <div class="remember-row">
+          <label class="remember-item">
+            <input type="checkbox" id="remember-id" />
+            아이디 저장
+          </label>
+          <label class="remember-item">
+            <input type="checkbox" id="remember-pass" />
+            비밀번호 저장
+          </label>
+          <label class="remember-item">
+            <input type="checkbox" id="auto-login" />
+            자동 로그인
+          </label>
+        </div>
+        <div class="actions">
+          <a href="#" onclick="alert('관리자에게 문의하세요.'); return false;">비밀번호 재설정</a>
+          <button type="submit">로그인</button>
+        </div>
+        <div class="form-error" id="login-error" role="alert" aria-live="polite" hidden>
+          관리자에게 문의하세요.
+        </div>
+      </form>
+
+      <div class="meta">
+        <span>보안 접속 중</span>
+        <div>ⓒ DONGTEUK CO., LTD.</div>
+      </div>
+    </section>
+  </main>
+  <script>
+    const form = document.getElementById("login-form");
+    const error = document.getElementById("login-error");
+    const rememberId = document.getElementById("remember-id");
+    const rememberPass = document.getElementById("remember-pass");
+    const autoLogin = document.getElementById("auto-login");
+    const usernameInput = document.getElementById("user-id");
+    const passwordInput = document.getElementById("user-pass");
+    const storageKeys = {
+      id: "dongteukRememberId",
+      pass: "dongteukRememberPass",
+      auto: "dongteukAutoLogin",
+      savedId: "dongteukSavedId",
+      savedPass: "dongteukSavedPass"
+    };
+
+    const normalizeDigits = (value) => (value || "").replace(/\D/g, "");
+    const getLastFour = (value) => normalizeDigits(value).slice(-4);
+
+    const loadLoginPrefs = () => {
+      if (!rememberId || !rememberPass || !autoLogin) return;
+      rememberId.checked = localStorage.getItem(storageKeys.id) === "1";
+      rememberPass.checked = localStorage.getItem(storageKeys.pass) === "1";
+      autoLogin.checked = localStorage.getItem(storageKeys.auto) === "1";
+      if (rememberId.checked && usernameInput) {
+        usernameInput.value = localStorage.getItem(storageKeys.savedId) || "";
+      }
+      if (rememberPass.checked && passwordInput) {
+        passwordInput.value = localStorage.getItem(storageKeys.savedPass) || "";
+      }
+    };
+
+    const saveLoginPrefs = () => {
+      if (!rememberId || !rememberPass || !autoLogin) return;
+      localStorage.setItem(storageKeys.id, rememberId.checked ? "1" : "0");
+      localStorage.setItem(storageKeys.pass, rememberPass.checked ? "1" : "0");
+      localStorage.setItem(storageKeys.auto, autoLogin.checked ? "1" : "0");
+      if (rememberId.checked && usernameInput) {
+        localStorage.setItem(storageKeys.savedId, usernameInput.value.trim());
+      } else {
+        localStorage.removeItem(storageKeys.savedId);
+      }
+      if (rememberPass.checked && passwordInput) {
+        localStorage.setItem(storageKeys.savedPass, passwordInput.value);
+      } else {
+        localStorage.removeItem(storageKeys.savedPass);
+      }
+    };
+
+    if (rememberId) {
+      rememberId.addEventListener("change", saveLoginPrefs);
+    }
+    if (rememberPass) {
+      rememberPass.addEventListener("change", () => {
+        if (!rememberPass.checked && autoLogin) {
+          autoLogin.checked = false;
+        }
+        saveLoginPrefs();
+      });
+    }
+    if (autoLogin) {
+      autoLogin.addEventListener("change", () => {
+        if (autoLogin.checked && rememberPass && !rememberPass.checked) {
+          rememberPass.checked = true;
+        }
+        saveLoginPrefs();
+      });
+    }
+
+    loadLoginPrefs();
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (!form.checkValidity()) {
+        error.hidden = false;
+        error.textContent = "관리자에게 문의하세요.";
+        return;
+      }
+      const username = (usernameInput?.value || "").trim();
+      const password = (passwordInput?.value || "").trim();
+      let drivers = [];
+      let passwords = {};
+      try {
+        drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+      } catch (e) {
+        drivers = [];
+      }
+      try {
+        passwords = JSON.parse(localStorage.getItem("dongteukPasswords") || "{}");
+      } catch (e) {
+        passwords = {};
+      }
+      const match = drivers.find((driver) => {
+        const name = (driver.name || "").trim();
+        if (name !== username) return false;
+        const stored = passwords[name];
+        if (stored) {
+          return password === stored;
+        }
+        return password === "0000";
+      });
+      if (match) {
+        error.hidden = true;
+        localStorage.setItem("dongteukCurrentUser", username);
+        localStorage.setItem("dongteukLoginTime", new Date().toISOString());
+        saveLoginPrefs();
+        const firstKey = `dongteukFirstLogin:${username}`;
+        if (!localStorage.getItem(firstKey)) {
+          localStorage.setItem(firstKey, "1");
+          alert("최초 로그인입니다. 비밀번호를 변경해 주세요.");
+          window.location.href = "settings.html";
+          return;
+        }
+        window.location.href = "second.html";
+        return;
+      }
+      error.hidden = false;
+      error.textContent = "관리자에게 문의하세요.";
+    });
+
+    if (autoLogin && autoLogin.checked) {
+      if (usernameInput?.value && passwordInput?.value) {
+        if (form.requestSubmit) {
+          form.requestSubmit();
+        } else {
+          form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+        }
+      }
+    }
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

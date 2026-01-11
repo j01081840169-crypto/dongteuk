@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>(주)동특 | 공지사항 상세</title>
+  <style>
+    :root {
+      --ink: #0e1a2b;
+      --deep: #0f223d;
+      --accent: #0b5fc1;
+      --paper: #ffffff;
+      --mist: #f4f6f9;
+      --card: #ffffff;
+      --line: rgba(15, 23, 42, 0.08);
+      --shadow: 0 20px 50px rgba(12, 24, 42, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 380px at 15% 0%, rgba(11, 95, 193, 0.08), transparent 65%),
+        radial-gradient(700px 340px at 92% 5%, rgba(11, 95, 193, 0.08), transparent 60%),
+        linear-gradient(180deg, #fbfbfd 0%, #f2f4f8 55%, #edf1f6 100%);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 120px;
+      background: #ffffff;
+      border-right: 1px solid var(--line);
+      padding: 10px 6px 8px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo {
+      width: 100px;
+      height: auto;
+      display: block;
+      margin-bottom: 24px;
+    }
+
+    .menu {
+      margin-top: 16px;
+      display: grid;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .menu a {
+      height: 36px;
+      line-height: 36px;
+      text-align: center;
+      text-decoration: none;
+      color: var(--deep);
+      padding: 0 10px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(15, 23, 42, 0.2);
+      transition: background 150ms ease, border 150ms ease;
+    }
+
+    .menu a.active {
+      background: rgba(11, 95, 193, 0.08);
+      border-color: rgba(11, 95, 193, 0.2);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .menu a:hover {
+      background: rgba(15, 23, 42, 0.04);
+      border-color: rgba(15, 23, 42, 0.06);
+    }
+
+    .main {
+      padding: 28px 32px 40px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 24px;
+      background: var(--accent);
+      color: #ffffff;
+      padding: 8px 18px;
+      border-radius: 20px;
+      min-height: 65px;
+      height: 65px;
+    }
+
+    .page-header h1 {
+      margin: 0;
+      font-size: 22px;
+      color: #ffffff;
+    }
+
+    .header-actions {
+      display: inline-flex;
+      gap: 8px;
+    }
+
+    .logout-btn {
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 12px;
+      color: rgba(14, 26, 43, 0.6);
+      margin-bottom: 14px;
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--deep);
+      margin: 0 0 12px;
+    }
+
+    .content {
+      white-space: pre-wrap;
+      line-height: 1.6;
+      font-size: 14px;
+      color: var(--ink);
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .actions a {
+      border: none;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.06);
+      color: var(--deep);
+    }
+  
+    /* Mobile layout */
+    @media (max-width: 720px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        overflow-x: hidden;
+        padding: 10px;
+        flex-wrap: wrap;
+      }
+
+      .sidebar-footer {
+        display: none;
+      }
+
+      .logo {
+        width: 80px;
+        margin: 0 8px 0 0;
+      }
+
+      .menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .menu a {
+        white-space: nowrap;
+        font-size: 12px;
+        height: 32px;
+      }
+
+      .main {
+        padding: 18px 14px 28px;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .card {
+        border-radius: 16px;
+        padding: 14px;
+      }
+
+      .page-header,
+      .topbar {
+        flex-wrap: wrap;
+        gap: 10px;
+        height: auto;
+        min-height: 0;
+      }
+    }
+  
+    
+    
+    /* Unified mobile sidebar menu */
+    @media (max-width: 720px) {
+      .layout {
+        display: flex !important;
+        flex-direction: column !important;
+        min-height: 0 !important;
+        width: 100% !important;
+      }
+
+      .sidebar {
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        position: static !important;
+        top: auto !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        gap: 4px !important;
+        overflow-x: hidden !important;
+        padding: 6px !important;
+        flex-wrap: wrap !important;
+      }
+
+      .sidebar-footer {
+        display: none !important;
+      }
+
+      .logo {
+        width: 54px !important;
+        margin: 0 !important;
+      }
+
+      .menu {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 2px !important;
+        margin-top: 2px !important;
+        width: 100% !important;
+        flex: 0 0 auto !important;
+        align-content: start !important;
+        grid-auto-rows: 18px !important;
+      }
+
+      .menu a {
+        white-space: normal !important;
+        font-size: 8px !important;
+        height: 18px !important;
+        line-height: 1 !important;
+        padding: 0 1px !important;
+        border-radius: 8px !important;
+      }
+
+      .main {
+        width: 100% !important;
+        padding: 6px 8px 12px !important;
+      }
+
+      .page-header,
+      .topbar {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        height: auto !important;
+        min-height: 0 !important;
+        padding: 6px 12px !important;
+      }
+
+      .page-header {
+        margin-bottom: 8px !important;
+      }
+
+      .controls {
+        margin-bottom: 8px !important;
+      }
+    }
+</style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="second.html"><img class="logo" src="Dongteuk.png" alt="(주)동특 로고" /></a>
+      <nav class="menu" aria-label="주요 메뉴">
+        <a href="second.html">&#50629;&#47924;&#54788;&#54889;</a>
+        <a class="active" href="notice.html">공지사항</a>
+        <a href="dispatch.html">배차현황</a>
+        <a href="report.html">기사업무</a>
+        <a href="office-work.html">&#49324;&#47924;&#50629;&#47924;</a>
+        <a href="register-info.html">등록정보</a>
+        <a href="settings.html">설정</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="login-meta">
+          <span id="login-user">-</span>
+          <span id="login-time">-</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="page-header">
+        <h1>공지사항 상세</h1>
+        <div class="header-actions">
+          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); location.href='main.html'">로그아웃</button>
+        </div>
+      </header>
+
+      <section class="card">
+        <div class="meta-row" id="notice-meta">-</div>
+        <h2 class="title" id="notice-title">-</h2>
+        <div class="content" id="notice-content">내용을 불러올 수 없습니다.</div>
+        <div class="actions">
+          <a href="#" onclick="history.back(); return false;">뒤로가기</a>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script>
+    const readNotices = () => {
+      try {
+        const raw = localStorage.getItem("dongteukNotices") || "[]";
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    };
+
+    const updateNoticeView = () => {
+      const params = new URLSearchParams(window.location.search);
+      const id = Number(params.get("id"));
+      const notices = readNotices();
+      const index = notices.findIndex((item) => Number(item.id) === id);
+      if (index === -1) return;
+      const notice = notices[index];
+      const titleEl = document.getElementById("notice-title");
+      const metaEl = document.getElementById("notice-meta");
+      const contentEl = document.getElementById("notice-content");
+      if (titleEl) titleEl.textContent = notice.title || "-";
+      if (contentEl) contentEl.textContent = notice.content || "-";
+      if (metaEl) {
+        const parts = [];
+        if (notice.author) parts.push(`작성자 ${notice.author}`);
+        if (notice.createdAt) parts.push(`등록일 ${notice.createdAt}`);
+        parts.push(`조회 ${notice.views || 0}`);
+        metaEl.textContent = parts.join(" · ") || "-";
+      }
+      notice.views = (notice.views || 0) + 1;
+      notices[index] = notice;
+      localStorage.setItem("dongteukNotices", JSON.stringify(notices));
+      new BroadcastChannel("dongteuk-sync").postMessage({ key: "dongteukNotices" });
+    };
+
+    updateNoticeView();
+
+    const renderLoginMeta = () => {
+      const userEl = document.getElementById("login-user");
+      const timeEl = document.getElementById("login-time");
+      if (!userEl || !timeEl) return;
+
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+      let displayName = currentUser || "-";
+      let displayTitle = "";
+      try {
+        const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+        const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+        if (found) {
+          displayName = found.name || displayName;
+          displayTitle = found.title || "";
+        }
+      } catch (error) {
+      }
+      const titleText = displayTitle ? ` ${displayTitle}` : "";
+      userEl.textContent = `${displayName}${titleText}`;
+
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mi = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      timeEl.textContent = `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
+    };
+
+    renderLoginMeta();
+    setInterval(renderLoginMeta, 1000);
+  </script>
+  <script>
+    // office-menu-guard
+    (() => {
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+      let isAdmin = false;
+      if (currentUser) {
+        try {
+          const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+          const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+          isAdmin = Boolean(found && found.status === "관리자");
+        } catch (error) {
+          isAdmin = false;
+        }
+      }
+      if (isAdmin) return;
+      const targets = document.querySelectorAll('a[href="office-work.html"]');
+      targets.forEach((el) => {
+        el.style.display = "none";
+        el.setAttribute("aria-hidden", "true");
+        el.tabIndex = -1;
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>&#50900;&#44553;&#47749;&#49464;&#49436;</title>
+  <style>
+    :root {
+      --ink: #0e1a2b;
+      --deep: #0f223d;
+      --accent: #0b5fc1;
+      --accent-2: #5aa7e6;
+      --paper: #ffffff;
+      --mist: #f4f6f9;
+      --card: #ffffff;
+      --line: rgba(15, 23, 42, 0.08);
+      --shadow: 0 20px 50px rgba(12, 24, 42, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 380px at 15% 0%, rgba(11, 95, 193, 0.08), transparent 65%),
+        radial-gradient(700px 340px at 92% 5%, rgba(11, 95, 193, 0.08), transparent 60%),
+        linear-gradient(180deg, #fbfbfd 0%, #f2f4f8 55%, #edf1f6 100%);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 120px;
+background: #ffffff;
+      border-right: 1px solid var(--line);
+      padding: 10px 6px 8px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+flex-direction: column;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo {
+      width: 100px;
+      height: auto;
+      display: block;
+      margin-bottom: 24px;
+    }
+
+            .menu {
+      margin-top: 16px;
+      display: grid;
+      gap: 8px;
+      flex: 1;
+    }
+
+            .menu a {
+      height: 36px;
+      line-height: 36px;
+      text-align: center;
+      text-decoration: none;
+      color: var(--deep);
+      padding: 0 10px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(15, 23, 42, 0.2);
+      transition: background 150ms ease, border 150ms ease;
+    }
+
+    .menu a.active {
+      background: rgba(11, 95, 193, 0.08);
+      border-color: rgba(11, 95, 193, 0.2);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .menu a:hover {
+      background: rgba(15, 23, 42, 0.04);
+      border-color: rgba(15, 23, 42, 0.06);
+    }
+
+    .main {
+      padding: 28px 32px 40px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 24px;
+      background: var(--accent);
+      color: #ffffff;
+      padding: 8px 18px;
+      border-radius: 20px;
+      flex-wrap: nowrap;
+      overflow: hidden;
+      min-height: 60px;
+      height: 60px;
+    }
+
+    .page-header h1 {
+      margin: 0;
+      font-size: 22px;
+      color: #ffffff;
+    }
+
+    .header-actions {
+      display: inline-flex;
+      gap: 8px;
+    }
+
+    .action-btn {
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    .logout-btn {
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 12px 26px rgba(11, 95, 193, 0.08);
+    }
+
+    .paystub-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .paystub-table th,
+    .paystub-table td {
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      padding: 8px 10px;
+      text-align: center;
+    }
+
+    .paystub-table th {
+      background: #f4f6fb;
+      color: rgba(14, 26, 43, 0.7);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+    }
+
+    .file-link {
+      color: var(--deep);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .file-link:hover {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    .file-btn {
+      border: 1px solid rgba(15, 23, 42, 0.2);
+      background: #ffffff;
+      color: var(--deep);
+      border-radius: 14px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .file-btn:hover {
+      background: rgba(11, 95, 193, 0.08);
+      border-color: rgba(11, 95, 193, 0.2);
+      color: var(--accent);
+    }
+
+    .sign-btn {
+      border: 1px solid rgba(15, 23, 42, 0.2);
+      background: #ffffff;
+      color: var(--deep);
+      border-radius: 14px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .sign-btn:hover {
+      background: rgba(11, 95, 193, 0.08);
+      border-color: rgba(11, 95, 193, 0.2);
+      color: var(--accent);
+    }
+
+    .meta {
+      margin-top: 10px;
+      font-size: 12px;
+      color: rgba(14, 26, 43, 0.6);
+    }
+
+    .signature-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(14, 26, 43, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 50;
+    }
+
+    .signature-modal.open {
+      display: flex;
+    }
+
+    .signature-dialog {
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 18px;
+      width: min(420px, 92vw);
+      box-shadow: 0 20px 50px rgba(12, 24, 42, 0.2);
+      display: grid;
+      gap: 12px;
+      text-align: center;
+    }
+
+    .signature-dialog h3 {
+      margin: 0;
+      font-size: 16px;
+      color: var(--deep);
+    }
+
+    .signature-dialog img {
+      width: 100%;
+      max-height: 220px;
+      object-fit: contain;
+      border-radius: 12px;
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      background: #f8fafc;
+    }
+
+    .signature-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .signature-actions button {
+      border-radius: 16px;
+      padding: 6px 14px;
+      font-size: 12px;
+      cursor: pointer;
+      border: 1px solid rgba(15, 23, 42, 0.16);
+      background: #ffffff;
+      color: var(--deep);
+    }
+
+    .signature-actions .confirm {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 120px 1fr;
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+      }
+    }
+  
+    /* Mobile layout */
+    @media (max-width: 720px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        overflow-x: hidden;
+        padding: 10px;
+        flex-wrap: wrap;
+      }
+
+      .sidebar-footer {
+        display: none;
+      }
+
+      .logo {
+        width: 80px;
+        margin: 0 8px 0 0;
+      }
+
+      .menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .menu a {
+        white-space: nowrap;
+        font-size: 12px;
+        height: 32px;
+      }
+
+      .main {
+        padding: 18px 14px 28px;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .card {
+        border-radius: 16px;
+        padding: 14px;
+      }
+
+      .page-header,
+      .topbar {
+        flex-wrap: wrap;
+        gap: 10px;
+        height: auto;
+        min-height: 0;
+      }
+    }
+  
+    
+    
+    /* Unified mobile sidebar menu */
+    @media (max-width: 720px) {
+      .layout {
+        display: flex !important;
+        flex-direction: column !important;
+        min-height: 0 !important;
+        width: 100% !important;
+      }
+
+      .sidebar {
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        position: static !important;
+        top: auto !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        gap: 4px !important;
+        overflow-x: hidden !important;
+        padding: 6px !important;
+        flex-wrap: wrap !important;
+      }
+
+      .sidebar-footer {
+        display: none !important;
+      }
+
+      .logo {
+        width: 54px !important;
+        margin: 0 !important;
+      }
+
+      .menu {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 2px !important;
+        margin-top: 2px !important;
+        width: 100% !important;
+        flex: 0 0 auto !important;
+        align-content: start !important;
+        grid-auto-rows: 18px !important;
+      }
+
+      .menu a {
+        white-space: normal !important;
+        font-size: 8px !important;
+        height: 18px !important;
+        line-height: 1 !important;
+        padding: 0 1px !important;
+        border-radius: 8px !important;
+      }
+
+      .main {
+        width: 100% !important;
+        padding: 6px 8px 12px !important;
+      }
+
+      .page-header,
+      .topbar {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        height: auto !important;
+        min-height: 0 !important;
+        padding: 6px 12px !important;
+      }
+
+      .page-header {
+        margin-bottom: 8px !important;
+      }
+
+      .controls {
+        margin-bottom: 8px !important;
+      }
+    }
+</style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="second.html"><img class="logo" src="Dongteuk.png" alt="(&#51452;&#46041;&#53945;&#32;&#47196;&#44256;)" /></a>
+      <nav class="menu" aria-label="&#51452;&#50836;&#32;&#47700;&#45684;">
+        <a href="second.html">&#50629;&#47924;&#54788;&#54889;</a>
+        <a href="notice.html">&#44277;&#51648;&#49324;&#54637;</a>
+        <a href="dispatch.html">&#48176;&#52264;&#54788;&#54889;</a>
+        <a href="report.html">&#44592;&#49324;&#50629;&#47924;</a>
+        <a href="office-work.html">&#49324;&#47924;&#50629;&#47924;</a>
+        <a href="register-info.html">&#46321;&#47197;&#51221;&#48372;</a>
+        <a href="settings.html">&#49444;&#51221;</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="login-meta">
+          <span id="login-user">-</span>
+          <span id="login-time">-</span>
+        </div>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="page-header">
+        <h1>&#50900;&#44553;&#47749;&#49464;&#49436;</h1>
+        <div class="header-actions">
+          <button class="action-btn" type="button" onclick="location.href='paystub-create.html'">등록</button>
+          <button class="logout-btn" type="button" onclick="history.back()">뒤로가기</button>
+          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); location.href='main.html'">&#47196;&#44536;&#50500;&#50883;</button>
+        </div>
+      </header>
+      <section class="card">
+        <h2>월급명세서</h2>
+        <table class="paystub-table">
+          <thead>
+            <tr>
+              <th style="width: 90px;">년월</th>
+              <th style="width: 120px;">기사</th>
+              <th>파일</th>
+              <th style="width: 140px;">서명</th>
+              <th style="width: 90px;">등록일</th>
+            </tr>
+          </thead>
+          <tbody id="paystub-list"></tbody>
+        </table>
+        <div class="meta" id="paystub-meta">-</div>
+      </section>
+    </main>
+  </div>
+  <div class="signature-modal" id="signature-modal" aria-hidden="true">
+    <div class="signature-dialog" role="dialog" aria-modal="true" aria-labelledby="signature-title">
+      <h3 id="signature-title">서명 확인</h3>
+      <img id="signature-image" alt="등록된 서명" />
+      <div class="signature-actions">
+        <button type="button" id="signature-cancel">취소</button>
+        <button type="button" class="confirm" id="signature-confirm">수령확인</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    const paystubList = document.getElementById("paystub-list");
+    const paystubMeta = document.getElementById("paystub-meta");
+    const signatureModal = document.getElementById("signature-modal");
+    const signatureImage = document.getElementById("signature-image");
+    const signatureCancel = document.getElementById("signature-cancel");
+    const signatureConfirm = document.getElementById("signature-confirm");
+    let pendingSignId = null;
+
+    const readPaystubs = () => {
+      try {
+        const raw = localStorage.getItem("dongteukPaystubs") || "[]";
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    };
+
+    const writePaystubs = (rows) => {
+      localStorage.setItem("dongteukPaystubs", JSON.stringify(rows));
+    };
+
+    const getCurrentUser = () => (localStorage.getItem("dongteukCurrentUser") || "").trim();
+    const readSignatureMap = () => {
+      try {
+        return JSON.parse(localStorage.getItem("dongteukSignatureImages") || "{}");
+      } catch (error) {
+        return {};
+      }
+    };
+
+    const dataUrlToBlob = (dataUrl) => {
+      const parts = String(dataUrl).split(",");
+      if (parts.length < 2) return null;
+      const header = parts[0];
+      const data = parts.slice(1).join(",");
+      const match = header.match(/data:(.*?);/);
+      const mime = match ? match[1] : "application/octet-stream";
+      const binary = atob(data);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i += 1) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return new Blob([bytes], { type: mime });
+    };
+
+    const openPaystubFile = (id) => {
+      const all = readPaystubs();
+      const item = all.find((row) => String(row.id) === String(id));
+      if (!item || !item.fileData) {
+        alert("첨부된 파일이 없습니다.");
+        return;
+      }
+      try {
+        const blob = dataUrlToBlob(item.fileData);
+        if (!blob) throw new Error("blob");
+        const url = URL.createObjectURL(blob);
+        window.open(url, "_blank", "noopener");
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+      } catch (error) {
+        window.open(item.fileData, "_blank", "noopener");
+      }
+    };
+
+    const renderPaystubs = () => {
+      if (!paystubList) return;
+      const currentUser = getCurrentUser();
+      const all = readPaystubs();
+      const filtered = all.filter((item) => (item.driver || "").trim() === currentUser);
+      const seen = new Set();
+      const rows = [];
+      filtered.forEach((item) => {
+        const key = `${item.year || ""}-${item.month || ""}`;
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+        rows.push(item);
+      });
+      if (!rows.length) {
+        paystubList.innerHTML = "<tr><td colspan=\"5\">등록된 월급명세서가 없습니다.</td></tr>";
+        if (paystubMeta) {
+          paystubMeta.textContent = "등록 0건 (본인 기준)";
+        }
+        return;
+      }
+      paystubList.innerHTML = rows
+        .map((item) => {
+          const ym = `${item.year || "-"}-${item.month || "--"}`;
+          const fileName = item.fileName || "파일 보기";
+          const fileLink = item.fileData
+            ? `<button class="file-btn" type="button" data-id="${item.id}">${fileName}</button>`
+            : "-";
+          const signCell = item.fileData
+            ? item.signed
+              ? "<span>수령완료</span>"
+              : `<button class="sign-btn" type="button" data-id="${item.id}">수령서명하기</button>`
+            : "-";
+          return `
+            <tr>
+              <td>${ym}</td>
+              <td>${item.driver || "-"}</td>
+              <td>${fileLink}</td>
+              <td>${signCell}</td>
+              <td>${item.createdAt || "-"}</td>
+            </tr>
+          `;
+        })
+        .join("");
+      if (paystubMeta) {
+        paystubMeta.textContent = `등록 ${rows.length}건 (본인 기준)`;
+      }
+    };
+
+    renderPaystubs();
+    const openSignatureModal = (dataUrl, id) => {
+      if (!signatureModal || !signatureImage) return;
+      pendingSignId = id;
+      signatureImage.src = dataUrl;
+      signatureModal.classList.add("open");
+      signatureModal.setAttribute("aria-hidden", "false");
+    };
+
+    const closeSignatureModal = () => {
+      if (!signatureModal || !signatureImage) return;
+      signatureModal.classList.remove("open");
+      signatureModal.setAttribute("aria-hidden", "true");
+      signatureImage.src = "";
+      pendingSignId = null;
+    };
+
+    if (signatureCancel) {
+      signatureCancel.addEventListener("click", closeSignatureModal);
+    }
+    if (signatureModal) {
+      signatureModal.addEventListener("click", (event) => {
+        if (event.target === signatureModal) {
+          closeSignatureModal();
+        }
+      });
+    }
+    if (signatureConfirm) {
+      signatureConfirm.addEventListener("click", () => {
+        if (!pendingSignId) return;
+        const list = readPaystubs();
+        const idx = list.findIndex((item) => String(item.id) === String(pendingSignId));
+        if (idx < 0) {
+          closeSignatureModal();
+          return;
+        }
+        list[idx].signed = true;
+        list[idx].signedAt = new Date().toISOString();
+        if (signatureImage?.src) {
+          list[idx].signedImage = signatureImage.src;
+        }
+        writePaystubs(list);
+        closeSignatureModal();
+        renderPaystubs();
+      });
+    }
+    if (paystubList) {
+      paystubList.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLButtonElement)) return;
+        if (!target.classList.contains("file-btn")) return;
+        const id = target.dataset.id;
+        if (id) {
+          openPaystubFile(id);
+        }
+      });
+      paystubList.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLButtonElement)) return;
+        if (!target.classList.contains("sign-btn")) return;
+        const id = target.dataset.id;
+        if (!id) return;
+        const currentUser = getCurrentUser();
+        const signatureMap = readSignatureMap();
+        const signatureData = signatureMap[currentUser] || "";
+        if (!signatureData) {
+          alert("설정에서 서명이미지를 등록해 주세요.");
+          return;
+        }
+        openSignatureModal(signatureData, id);
+      });
+    }
+
+    const renderLoginMeta = () => {
+      const userEl = document.getElementById("login-user");
+      const timeEl = document.getElementById("login-time");
+      if (!userEl || !timeEl) return;
+
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+      let displayName = currentUser || "-";
+      let displayTitle = "";
+      try {
+        const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+        const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+        if (found) {
+          displayName = found.name || displayName;
+          displayTitle = found.title || "";
+        }
+      } catch (error) {
+      }
+      const titleText = displayTitle ? ` ${displayTitle}` : "";
+      userEl.textContent = `${displayName}${titleText}`;
+
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const hh = String(now.getHours()).padStart(2, "0");
+      const min = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      timeEl.textContent = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+    };
+
+    renderLoginMeta();
+    setInterval(renderLoginMeta, 1000);
+  </script>
+  <script>
+    // office-menu-guard
+    (() => {
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+      let isAdmin = false;
+      if (currentUser) {
+        try {
+          const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+          const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+          isAdmin = Boolean(found && found.status === "관리자");
+        } catch (error) {
+          isAdmin = false;
+        }
+      }
+      if (isAdmin) return;
+      const targets = document.querySelectorAll('a[href="office-work.html"]');
+      targets.forEach((el) => {
+        el.style.display = "none";
+        el.setAttribute("aria-hidden", "true");
+        el.tabIndex = -1;
+      });
+    })();
+  </script>
+</body>
+</html>

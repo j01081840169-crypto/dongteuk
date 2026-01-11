@@ -1,0 +1,880 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>(주)동특 | 설정</title>
+  <style>
+    :root {
+      --ink: #0e1a2b;
+      --deep: #0f223d;
+      --accent: #0b5fc1;
+      --accent-2: #5aa7e6;
+      --paper: #ffffff;
+      --mist: #f4f6f9;
+      --card: #ffffff;
+      --line: rgba(15, 23, 42, 0.08);
+      --shadow: 0 20px 50px rgba(12, 24, 42, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 380px at 15% 0%, rgba(11, 95, 193, 0.08), transparent 65%),
+        radial-gradient(700px 340px at 92% 5%, rgba(11, 95, 193, 0.08), transparent 60%),
+        linear-gradient(180deg, #fbfbfd 0%, #f2f4f8 55%, #edf1f6 100%);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      min-height: 100vh;
+    }
+
+                .sidebar {
+      width: 120px;
+      background: #ffffff;
+      border-right: 1px solid var(--line);
+      padding: 10px 6px 8px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo {
+      width: 100px;
+      height: auto;
+      display: block;
+      margin-bottom: 24px;
+    }
+
+            .menu {
+      margin-top: 16px;
+      display: grid;
+      gap: 8px;
+      flex: 1;
+    }
+
+            .menu a {
+      height: 36px;
+      line-height: 36px;
+      text-align: center;
+      text-decoration: none;
+      color: var(--deep);
+      padding: 0 10px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(15, 23, 42, 0.2);
+      transition: background 150ms ease, border 150ms ease;
+    }
+
+    .menu a.active {
+      background: rgba(11, 95, 193, 0.08);
+      border-color: rgba(11, 95, 193, 0.2);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .menu a:hover {
+      background: rgba(15, 23, 42, 0.04);
+      border-color: rgba(15, 23, 42, 0.06);
+    }
+
+    .main {
+      padding: 28px 32px 40px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 24px;
+      background: var(--accent);
+      color: #ffffff;
+      padding: 8px 18px;
+      border-radius: 20px;
+          min-height: 65px;      height: 65px;}
+
+    .page-header h1 {
+      margin: 0;
+      font-size: 22px;
+      color: #ffffff;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      grid-column: span 6;
+      display: grid;
+      gap: 12px;
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .row:last-child {
+      border-bottom: none;
+    }
+
+    .row span {
+      font-size: 13px;
+      color: rgba(14, 26, 43, 0.7);
+    }
+
+    .toggle {
+      width: 46px;
+      height: 24px;
+      border-radius: 20px;
+      background: rgba(15, 23, 42, 0.12);
+      position: relative;
+    }
+
+    .toggle::after {
+      content: "";
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #ffffff;
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
+    }
+
+    .toggle.on {
+      background: rgba(11, 95, 193, 0.25);
+    }
+
+    .toggle.on::after {
+      left: 23px;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .actions button {
+      border: none;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .form-field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .form-field label {
+      font-size: 12px;
+      color: rgba(14, 26, 43, 0.6);
+    }
+
+    .form-field input {
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 20px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: rgba(14, 26, 43, 0.6);
+    }
+
+    .form-result {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .form-result.success {
+      color: #0b5fc1;
+    }
+
+    .form-result.error {
+      color: #c2252a;
+    }
+
+    .primary {
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 10px 24px rgba(11, 95, 193, 0.25);
+    }
+
+    .ghost {
+      background: rgba(15, 23, 42, 0.06);
+      color: var(--deep);
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 120px 1fr;
+      }
+
+                  .sidebar {
+      background: #ffffff;
+      border-right: 1px solid var(--line);
+      padding: 10px 6px 8px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+              .menu {
+      display: grid;
+      gap: 8px;
+      flex: 1;
+    }
+
+      .main {
+        padding: 22px 18px 32px;
+      }
+
+      .card {
+        grid-column: span 12;
+      }
+    }
+    /* Pebble header */    .page-header {      background: var(--accent);      color: #ffffff;      padding: 8px 18px;      border-radius: 20px;      min-height: 65px;      height: 65px;      box-shadow: none;    }
+
+    .page-header h1 {
+      color: #ffffff;
+    }
+    .header-actions {
+      display: inline-flex;
+      gap: 8px;
+    }
+
+    .logout-btn {
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }    /* Unified header size */    .page-header {      min-height: 65px;      height: 65px;      padding: 8px 18px;    }    .topbar {      min-height: 65px;      height: 65px;      padding: 8px 18px;    }  
+    /* Mobile layout */
+    @media (max-width: 720px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        overflow-x: hidden;
+        padding: 10px;
+        flex-wrap: wrap;
+      }
+
+      .sidebar-footer {
+        display: none;
+      }
+
+      .logo {
+        width: 80px;
+        margin: 0 8px 0 0;
+      }
+
+      .menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .menu a {
+        white-space: nowrap;
+        font-size: 12px;
+        height: 32px;
+      }
+
+      .main {
+        padding: 18px 14px 28px;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .card {
+        border-radius: 16px;
+        padding: 14px;
+      }
+
+      .page-header,
+      .topbar {
+        flex-wrap: wrap;
+        gap: 10px;
+        height: auto;
+        min-height: 0;
+      }
+    }
+  
+    
+    
+    /* Unified mobile sidebar menu */
+    @media (max-width: 720px) {
+      .layout {
+        display: flex !important;
+        flex-direction: column !important;
+        min-height: 0 !important;
+        width: 100% !important;
+      }
+
+      .sidebar {
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        position: static !important;
+        top: auto !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        gap: 4px !important;
+        overflow-x: hidden !important;
+        padding: 6px !important;
+        flex-wrap: wrap !important;
+      }
+
+      .sidebar-footer {
+        display: none !important;
+      }
+
+      .logo {
+        width: 54px !important;
+        margin: 0 !important;
+      }
+
+      .menu {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 2px !important;
+        margin-top: 2px !important;
+        width: 100% !important;
+        flex: 0 0 auto !important;
+        align-content: start !important;
+        grid-auto-rows: 18px !important;
+      }
+
+      .menu a {
+        white-space: normal !important;
+        font-size: 8px !important;
+        height: 18px !important;
+        line-height: 1 !important;
+        padding: 0 1px !important;
+        border-radius: 8px !important;
+      }
+
+      .main {
+        width: 100% !important;
+        padding: 6px 8px 12px !important;
+      }
+
+      .page-header,
+      .topbar {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        height: auto !important;
+        min-height: 0 !important;
+        padding: 6px 12px !important;
+      }
+
+      .page-header {
+        margin-bottom: 8px !important;
+      }
+
+      .controls {
+        margin-bottom: 8px !important;
+      }
+    }
+</style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="second.html"><img class="logo" src="Dongteuk.png" alt="(주)동특 로고" /></a>
+      <nav class="menu" aria-label="주요 메뉴">
+        <a href="second.html">&#50629;&#47924;&#54788;&#54889;</a>
+        <a href="notice.html">공지사항</a>
+        <a href="dispatch.html">배차현황</a>
+        <a href="report.html">기사업무</a>
+        <a href="office-work.html">&#49324;&#47924;&#50629;&#47924;</a>
+        <a href="register-info.html">등록정보</a>
+        <a class="active" href="settings.html">설정</a>
+            
+      </nav>
+<div class="sidebar-footer">
+        <div class="login-meta">
+          <span id="login-user">-</span>
+          <span id="login-time">-</span>
+        </div>
+      </div></aside>
+
+    <main class="main">
+      <header class="page-header">
+        <h1>설정</h1>
+          <div class="header-actions">
+      <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); location.href='main.html'">로그아웃</button>
+    </div></header>
+
+      <section class="grid">
+        <article class="card">
+          <h2>비밀번호 변경</h2>
+          <div class="form-field">
+            <label for="pw-name">이름 (아이디)</label>
+            <input id="pw-name" type="text" placeholder="이름 입력" />
+          </div>
+          <div class="form-field">
+            <label for="pw-current">현재 비밀번호</label>
+            <input id="pw-current" type="password" placeholder="현재 비밀번호" />
+          </div>
+          <div class="form-field">
+            <label for="pw-new">새 비밀번호</label>
+            <input id="pw-new" type="password" placeholder="새 비밀번호" />
+          </div>
+          <div class="form-field">
+            <label for="pw-confirm">새 비밀번호 확인</label>
+            <input id="pw-confirm" type="password" placeholder="새 비밀번호 확인" />
+          </div>
+          <div class="form-hint">아이디는 이름, 초기 비밀번호는 0000입니다.</div>
+          <div class="form-result" id="pw-result"></div>
+          <div class="actions">
+            <button class="ghost" type="button" id="pw-reset">입력 초기화</button>
+            <button class="primary" type="button" id="pw-save">변경 저장</button>
+          </div>
+        </article>
+        <article class="card">
+          <h2>휴대폰번호 변경</h2>
+          <div class="form-field">
+            <label for="phone-name">이름 (아이디)</label>
+            <input id="phone-name" type="text" placeholder="이름 입력" />
+          </div>
+          <div class="form-field">
+            <label for="phone-current">현재 휴대폰번호</label>
+            <input id="phone-current" type="text" placeholder="현재 휴대폰번호" />
+          </div>
+          <div class="form-field">
+            <label for="phone-new">새 휴대폰번호</label>
+            <input id="phone-new" type="text" placeholder="새 휴대폰번호" />
+          </div>
+          <div class="form-field">
+            <label for="phone-confirm">새 휴대폰번호 확인</label>
+            <input id="phone-confirm" type="text" placeholder="새 휴대폰번호 확인" />
+          </div>
+          <div class="form-hint">숫자만 입력해 주세요.</div>
+          <div class="form-result" id="phone-result"></div>
+          <div class="actions">
+            <button class="ghost" type="button" id="phone-reset">입력 초기화</button>
+            <button class="primary" type="button" id="phone-save">변경 저장</button>
+          </div>
+        </article>
+        <article class="card">
+          <h2>서명이미지 등록</h2>
+          <div class="form-field">
+            <label for="signature-file">서명이미지 업로드</label>
+            <input id="signature-file" type="file" accept="image/*" />
+          </div>
+          <div class="form-field">
+            <label>미리보기</label>
+            <img id="signature-preview" alt="서명이미지 미리보기" style="max-width: 240px; width: 100%; max-height: 140px; border-radius: 12px; border: 1px solid rgba(15, 23, 42, 0.12); background: #fff;" />
+          </div>
+          <div class="form-result" id="signature-result"></div>
+          <div class="actions">
+            <button class="ghost" type="button" id="signature-remove">삭제</button>
+            <button class="primary" type="button" id="signature-save">등록</button>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+  <script>
+    const byId = (id) => document.getElementById(id);
+    const nameInput = byId("pw-name");
+    const currentInput = byId("pw-current");
+    const newInput = byId("pw-new");
+    const confirmInput = byId("pw-confirm");
+    const result = byId("pw-result");
+    const resetBtn = byId("pw-reset");
+    const saveBtn = byId("pw-save");
+    const phoneNameInput = byId("phone-name");
+    const phoneCurrentInput = byId("phone-current");
+    const phoneNewInput = byId("phone-new");
+    const phoneConfirmInput = byId("phone-confirm");
+    const phoneResult = byId("phone-result");
+    const phoneResetBtn = byId("phone-reset");
+    const phoneSaveBtn = byId("phone-save");
+    const signatureFile = byId("signature-file");
+    const signaturePreview = byId("signature-preview");
+    const signatureResult = byId("signature-result");
+    const signatureRemoveBtn = byId("signature-remove");
+    const signatureSaveBtn = byId("signature-save");
+
+    const normalizeDigits = (value) => (value || "").replace(/\D/g, "");
+    const getLastFour = (value) => normalizeDigits(value).slice(-4);
+    const formatPhone = (value) => {
+      const digits = normalizeDigits(value);
+      if (digits.length === 11) {
+        return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+      }
+      if (digits.length === 10) {
+        return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+      }
+      return digits;
+    };
+
+    const readDrivers = () => {
+      try {
+        return JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+      } catch (error) {
+        return [];
+      }
+    };
+
+    const readPasswords = () => {
+      try {
+        return JSON.parse(localStorage.getItem("dongteukPasswords") || "{}");
+      } catch (error) {
+        return {};
+      }
+    };
+
+    const writePasswords = (passwords) => {
+      localStorage.setItem("dongteukPasswords", JSON.stringify(passwords));
+    };
+
+    const setResult = (message, type) => {
+      if (!result) return;
+      result.textContent = message;
+      result.classList.remove("success", "error");
+      if (type) {
+        result.classList.add(type);
+      }
+    };
+
+    const setPhoneResult = (message, type) => {
+      if (!phoneResult) return;
+      phoneResult.textContent = message;
+      phoneResult.classList.remove("success", "error");
+      if (type) {
+        phoneResult.classList.add(type);
+      }
+    };
+
+    const setSignatureResult = (message, type) => {
+      if (!signatureResult) return;
+      signatureResult.textContent = message;
+      signatureResult.classList.remove("success", "error");
+      if (type) {
+        signatureResult.classList.add(type);
+      }
+    };
+
+    const getSignatureKey = () => {
+      const user = (localStorage.getItem("dongteukCurrentUser") || "").trim() || "default";
+      return user;
+    };
+
+    const readSignatureMap = () => {
+      try {
+        return JSON.parse(localStorage.getItem("dongteukSignatureImages") || "{}");
+      } catch (error) {
+        return {};
+      }
+    };
+
+    const writeSignatureMap = (map) => {
+      localStorage.setItem("dongteukSignatureImages", JSON.stringify(map));
+    };
+
+    const loadSignaturePreview = () => {
+      if (!signaturePreview) return;
+      const map = readSignatureMap();
+      const key = getSignatureKey();
+      const dataUrl = map[key] || "";
+      signaturePreview.src = dataUrl || "";
+      signaturePreview.style.display = dataUrl ? "block" : "none";
+    };
+
+    if (resetBtn) {
+      resetBtn.addEventListener("click", () => {
+        if (nameInput) nameInput.value = "";
+        if (currentInput) currentInput.value = "";
+        if (newInput) newInput.value = "";
+        if (confirmInput) confirmInput.value = "";
+        setResult("", "");
+      });
+    }
+
+    if (saveBtn) {
+      saveBtn.addEventListener("click", () => {
+        const username = (nameInput?.value || "").trim();
+        const current = (currentInput?.value || "").trim();
+        const next = (newInput?.value || "").trim();
+        const confirm = (confirmInput?.value || "").trim();
+
+        if (!username || !current || !next || !confirm) {
+          setResult("모든 항목을 입력해 주세요.", "error");
+          return;
+        }
+        if (next !== confirm) {
+          setResult("새 비밀번호가 일치하지 않습니다.", "error");
+          return;
+        }
+        const drivers = readDrivers();
+        const driver = drivers.find((item) => (item.name || "").trim() === username);
+        if (!driver) {
+          setResult("이름(아이디)을 확인해 주세요.", "error");
+          return;
+        }
+        const passwords = readPasswords();
+        const stored = passwords[username];
+        const baseMatch = current === "0000";
+        const match = stored ? current === stored : baseMatch;
+        if (!match) {
+          setResult("현재 비밀번호가 올바르지 않습니다.", "error");
+          return;
+        }
+        passwords[username] = next;
+        writePasswords(passwords);
+        setResult("비밀번호가 변경되었습니다.", "success");
+      });
+    }
+
+    if (phoneResetBtn) {
+      phoneResetBtn.addEventListener("click", () => {
+        if (phoneNameInput) phoneNameInput.value = "";
+        if (phoneCurrentInput) phoneCurrentInput.value = "";
+        if (phoneNewInput) phoneNewInput.value = "";
+        if (phoneConfirmInput) phoneConfirmInput.value = "";
+        setPhoneResult("", "");
+      });
+    }
+
+    if (phoneSaveBtn) {
+      phoneSaveBtn.addEventListener("click", () => {
+        const username = (phoneNameInput?.value || "").trim();
+        const current = normalizeDigits(phoneCurrentInput?.value || "");
+        const next = normalizeDigits(phoneNewInput?.value || "");
+        const confirm = normalizeDigits(phoneConfirmInput?.value || "");
+
+        if (!username || !current || !next || !confirm) {
+          setPhoneResult("모든 항목을 입력해 주세요.", "error");
+          return;
+        }
+        if (next !== confirm) {
+          setPhoneResult("새 휴대폰번호가 일치하지 않습니다.", "error");
+          return;
+        }
+        const drivers = readDrivers();
+        const index = drivers.findIndex((item) => (item.name || "").trim() === username);
+        if (index < 0) {
+          setPhoneResult("이름(아이디)을 확인해 주세요.", "error");
+          return;
+        }
+        const stored = normalizeDigits(drivers[index].phone || "");
+        if (stored && stored !== current) {
+          setPhoneResult("현재 휴대폰번호가 올바르지 않습니다.", "error");
+          return;
+        }
+        drivers[index].phone = formatPhone(next);
+        localStorage.setItem("dongteukDrivers", JSON.stringify(drivers));
+        new BroadcastChannel("dongteuk-sync").postMessage({ key: "dongteukDrivers" });
+        setPhoneResult("휴대폰번호가 변경되었습니다.", "success");
+      });
+    }
+
+    if (signatureSaveBtn) {
+      signatureSaveBtn.addEventListener("click", () => {
+        if (!(signatureFile instanceof HTMLInputElement) || !signatureFile.files?.length) {
+          setSignatureResult("서명이미지를 선택해 주세요.", "error");
+          return;
+        }
+        const file = signatureFile.files[0];
+        const reader = new FileReader();
+        reader.onload = () => {
+          const map = readSignatureMap();
+          map[getSignatureKey()] = String(reader.result || "");
+          writeSignatureMap(map);
+          loadSignaturePreview();
+          setSignatureResult("서명이미지가 등록되었습니다.", "success");
+        };
+        reader.onerror = () => {
+          setSignatureResult("이미지 등록에 실패했습니다.", "error");
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    if (signatureRemoveBtn) {
+      signatureRemoveBtn.addEventListener("click", () => {
+        const map = readSignatureMap();
+        delete map[getSignatureKey()];
+        writeSignatureMap(map);
+        if (signatureFile instanceof HTMLInputElement) {
+          signatureFile.value = "";
+        }
+        loadSignaturePreview();
+        setSignatureResult("서명이미지가 삭제되었습니다.", "success");
+      });
+    }
+
+    if (signatureFile) {
+      signatureFile.addEventListener("change", () => {
+        setSignatureResult("", "");
+      });
+    }
+
+    loadSignaturePreview();
+  
+    const renderLoginMeta = () => {
+      const userEl = document.getElementById("login-user");
+      const timeEl = document.getElementById("login-time");
+      if (!userEl || !timeEl) return;
+
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+      let displayName = currentUser || "-";
+      let displayTitle = "";
+      try {
+        const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+        const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+        if (found) {
+          displayName = found.name || displayName;
+          displayTitle = found.title || "";
+        }
+      } catch (error) {
+      }
+      const titleText = displayTitle ? ` ${displayTitle}` : "";
+      userEl.textContent = `${displayName}${titleText}`;
+
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mi = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      timeEl.textContent = `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
+    };
+
+    renderLoginMeta();
+    setInterval(renderLoginMeta, 1000);</script>
+  <script>
+    // admin-menu-guard
+    (() => {
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+      let isAdmin = false;
+      if (currentUser) {
+        try {
+          const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+          const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+          isAdmin = Boolean(found && found.status === "관리자");
+        } catch (error) {
+          isAdmin = false;
+        }
+      }
+      if (isAdmin) return;
+      const targets = document.querySelectorAll(
+        'a[href="register-info.html"], a[href="dispatch-create.html"], a[href="office-work.html"]'
+      );
+      targets.forEach((el) => {
+        el.style.display = "none";
+        el.setAttribute("aria-hidden", "true");
+        el.tabIndex = -1;
+      });
+    })();
+  </script>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

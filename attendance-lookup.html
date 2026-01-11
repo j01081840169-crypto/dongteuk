@@ -1,0 +1,726 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>(주)동특 | 근태조회</title>
+  <style>
+    :root {
+      --ink: #0e1a2b;
+      --deep: #0f223d;
+      --accent: #0b5fc1;
+      --paper: #ffffff;
+      --mist: #f4f6f9;
+      --card: #ffffff;
+      --line: rgba(15, 23, 42, 0.08);
+      --shadow: 0 20px 50px rgba(12, 24, 42, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 380px at 15% 0%, rgba(11, 95, 193, 0.08), transparent 65%),
+        radial-gradient(700px 340px at 92% 5%, rgba(11, 95, 193, 0.08), transparent 60%),
+        linear-gradient(180deg, #fbfbfd 0%, #f2f4f8 55%, #edf1f6 100%);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 120px;
+      background: #ffffff;
+      border-right: 1px solid var(--line);
+      padding: 10px 6px 8px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo {
+      width: 100px;
+      height: auto;
+      display: block;
+      margin-bottom: 24px;
+    }
+
+    .menu {
+      margin-top: 16px;
+      display: grid;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .menu a {
+      height: 36px;
+      line-height: 36px;
+      text-align: center;
+      text-decoration: none;
+      color: var(--deep);
+      padding: 0 10px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(15, 23, 42, 0.2);
+      transition: background 150ms ease, border 150ms ease;
+    }
+
+    .menu a.active {
+      background: rgba(11, 95, 193, 0.08);
+      border-color: rgba(11, 95, 193, 0.2);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .menu a:hover {
+      background: rgba(15, 23, 42, 0.04);
+      border-color: rgba(15, 23, 42, 0.06);
+    }
+
+    .main {
+      padding: 28px 32px 40px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 24px;
+      background: var(--accent);
+      color: #ffffff;
+      padding: 8px 18px;
+      border-radius: 20px;
+      min-height: 65px;
+      height: 65px;
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 22px;
+      color: #ffffff;
+    }
+
+    .header-actions {
+      display: inline-flex;
+      gap: 8px;
+    }
+
+    .logout-btn {
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .filters {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .filters label {
+      font-size: 12px;
+      color: rgba(14, 26, 43, 0.6);
+    }
+
+    .filters select {
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 20px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-family: inherit;
+    }
+
+    .table-wrap {
+      overflow: auto;
+    }
+
+    .attendance-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .attendance-table th,
+    .attendance-table td {
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      padding: 8px 10px;
+      text-align: center;
+    }
+
+    .attendance-table th {
+      background: #f4f6fb;
+      color: rgba(14, 26, 43, 0.7);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+    }
+
+    .att-detail {
+      text-align: left;
+      font-size: 11px;
+      color: rgba(14, 26, 43, 0.7);
+      line-height: 1.4;
+      white-space: pre-line;
+    }
+
+    .meta {
+      margin-top: 10px;
+      font-size: 12px;
+      color: rgba(14, 26, 43, 0.6);
+    }
+  
+    /* Mobile layout */
+    @media (max-width: 720px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        overflow-x: hidden;
+        padding: 10px;
+        flex-wrap: wrap;
+      }
+
+      .sidebar-footer {
+        display: none;
+      }
+
+      .logo {
+        width: 80px;
+        margin: 0 8px 0 0;
+      }
+
+      .menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .menu a {
+        white-space: nowrap;
+        font-size: 12px;
+        height: 32px;
+      }
+
+      .main {
+        padding: 18px 14px 28px;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .card {
+        border-radius: 16px;
+        padding: 14px;
+      }
+
+      .page-header,
+      .topbar {
+        flex-wrap: wrap;
+        gap: 10px;
+        height: auto;
+        min-height: 0;
+      }
+    }
+  
+    
+    
+    /* Unified mobile sidebar menu */
+    @media (max-width: 720px) {
+      .layout {
+        display: flex !important;
+        flex-direction: column !important;
+        min-height: 0 !important;
+        width: 100% !important;
+      }
+
+      .sidebar {
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        position: static !important;
+        top: auto !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        gap: 4px !important;
+        overflow-x: hidden !important;
+        padding: 6px !important;
+        flex-wrap: wrap !important;
+      }
+
+      .sidebar-footer {
+        display: none !important;
+      }
+
+      .logo {
+        width: 54px !important;
+        margin: 0 !important;
+      }
+
+      .menu {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 2px !important;
+        margin-top: 2px !important;
+        width: 100% !important;
+        flex: 0 0 auto !important;
+        align-content: start !important;
+        grid-auto-rows: 18px !important;
+      }
+
+      .menu a {
+        white-space: normal !important;
+        font-size: 8px !important;
+        height: 18px !important;
+        line-height: 1 !important;
+        padding: 0 1px !important;
+        border-radius: 8px !important;
+      }
+
+      .main {
+        width: 100% !important;
+        padding: 6px 8px 12px !important;
+      }
+
+      .page-header,
+      .topbar {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        height: auto !important;
+        min-height: 0 !important;
+        padding: 6px 12px !important;
+      }
+
+      .page-header {
+        margin-bottom: 8px !important;
+      }
+
+      .controls {
+        margin-bottom: 8px !important;
+      }
+    }
+</style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="second.html"><img class="logo" src="Dongteuk.png" alt="(주)동특 로고" /></a>
+      <nav class="menu" aria-label="주요 메뉴">
+        <a href="second.html">&#50629;&#47924;&#54788;&#54889;</a>
+        <a href="notice.html">공지사항</a>
+        <a href="dispatch.html">배차현황</a>
+        <a href="report.html">기사업무</a>
+        <a class="active" href="office-work.html">&#49324;&#47924;&#50629;&#47924;</a>
+        <a href="register-info.html">등록정보</a>
+        <a href="settings.html">설정</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="login-meta">
+          <span id="login-user">-</span>
+          <span id="login-time">-</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <h1>근태조회</h1>
+        <div class="header-actions">
+          <button class="logout-btn" type="button" onclick="history.back()">뒤로가기</button>
+          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); location.href='main.html'">로그아웃</button>
+        </div>
+      </header>
+
+      <section class="card">
+        <div class="filters">
+          <label for="att-mode">구분</label>
+          <select id="att-mode">
+            <option value="monthly" selected>월간</option>
+            <option value="yearly">연간</option>
+          </select>
+          <label for="att-year">년</label>
+          <select id="att-year"></select>
+          <label for="att-month">월</label>
+          <select id="att-month"></select>
+        </div>
+        <div class="table-wrap">
+          <table class="attendance-table">
+            <thead>
+              <tr>
+                <th>기사</th>
+                <th>출근</th>
+                <th>휴무</th>
+                <th>기타</th>
+                <th>연차</th>
+                <th>경조사</th>
+                <th>교육</th>
+                <th>기타내역</th>
+                <th>총일수</th>
+              </tr>
+            </thead>
+            <tbody id="att-body"></tbody>
+          </table>
+        </div>
+        <div class="meta" id="att-range">-</div>
+      </section>
+    </main>
+  </div>
+  <script>
+    const attBody = document.getElementById("att-body");
+    const attMode = document.getElementById("att-mode");
+    const attYear = document.getElementById("att-year");
+    const attMonth = document.getElementById("att-month");
+    const attRange = document.getElementById("att-range");
+
+    const readDrivers = () => {
+      try {
+        const raw = localStorage.getItem("dongteukDrivers") || "[]";
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed)
+          ? parsed.filter((item) => item.status !== "관리자")
+          : [];
+      } catch (error) {
+        return [];
+      }
+    };
+
+    const readDispatches = () => {
+      try {
+        const raw = localStorage.getItem("dongteukDispatches") || "[]";
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    };
+
+    const readOffByDate = () => {
+      try {
+        return JSON.parse(localStorage.getItem("dongteukOffByDate") || "{}");
+      } catch (error) {
+        return {};
+      }
+    };
+
+    const readMiscByDate = () => {
+      try {
+        return JSON.parse(localStorage.getItem("dongteukMiscByDate") || "{}");
+      } catch (error) {
+        return {};
+      }
+    };
+
+    const toDateString = (date) => {
+      const yyyy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, "0");
+      const dd = String(date.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    };
+
+    const getMonthRange = (year, month) => {
+      const y = Number(year);
+      const m = Number(month);
+      if (!y || !m) return null;
+      const start = new Date(y, m - 1, 1);
+      const end = new Date(y, m, 0);
+      return { start: toDateString(start), end: toDateString(end) };
+    };
+
+    const getYearRange = (year) => {
+      const y = Number(year);
+      if (!y) return null;
+      const start = new Date(y, 0, 1);
+      const end = new Date(y, 11, 31);
+      return { start: toDateString(start), end: toDateString(end) };
+    };
+
+    const extractNames = (values) => {
+      const names = [];
+      values.forEach((value) => {
+        value
+          .split(/[,\u002f]/)
+          .map((item) => item.trim())
+          .filter(Boolean)
+          .forEach((item) => {
+            const parts = item
+              .split(/[:：]/)
+              .map((part) => part.trim())
+              .filter(Boolean);
+            if (parts.length > 1) {
+              names.push(parts[parts.length - 1]);
+            } else {
+              names.push(item);
+            }
+          });
+      });
+      return names;
+    };
+
+    const renderAttendance = () => {
+      if (!attBody || !attYear || !attMonth) return;
+      const year = attYear.value;
+      const month = attMonth.value;
+      const isYearly = attMode?.value === "yearly";
+      const range = isYearly ? getYearRange(year) : getMonthRange(year, month);
+      if (attRange) {
+        if (range) {
+          const label = isYearly ? "연간" : "월간";
+          attRange.textContent = `${label} ${range.start} ~ ${range.end} 조회`;
+          attRange.style.display = "block";
+        } else {
+          attRange.textContent = "-";
+          attRange.style.display = "none";
+        }
+      }
+      const drivers = readDrivers()
+        .map((item) => item.name)
+        .filter(Boolean);
+      if (!drivers.length) {
+        attBody.innerHTML = "<tr><td colspan=\"9\">등록된 기사가 없습니다.</td></tr>";
+        return;
+      }
+      const rows = readDispatches();
+      const offByDate = readOffByDate();
+      const counts = drivers.reduce((map, name) => {
+        map[name] = { work: 0, rest: 0, etc: 0, annual: 0, event: 0, training: 0 };
+        return map;
+      }, {});
+      const miscByDate = readMiscByDate();
+      const etcDates = drivers.reduce((map, name) => {
+        map[name] = new Set();
+        return map;
+      }, {});
+      const annualDates = drivers.reduce((map, name) => {
+        map[name] = new Set();
+        return map;
+      }, {});
+      const eventDates = drivers.reduce((map, name) => {
+        map[name] = new Set();
+        return map;
+      }, {});
+      const trainingDates = drivers.reduce((map, name) => {
+        map[name] = new Set();
+        return map;
+      }, {});
+      const etcDetails = drivers.reduce((map, name) => {
+        map[name] = [];
+        return map;
+      }, {});
+      const filtered = range
+        ? rows.filter((row) => row.dispatchDate >= range.start && row.dispatchDate <= range.end)
+        : rows.filter((row) => row.dispatchDate);
+      filtered.forEach((row) => {
+        const name = (row.driver || "").trim();
+        if (!name || !counts[name]) return;
+        counts[name].work += 1;
+      });
+      const collectMiscEntries = (dateKey) => {
+        const notes = Array.isArray(miscByDate[dateKey]) ? miscByDate[dateKey] : [];
+        notes.forEach((note) => {
+          const text = String(note || "").trim();
+          if (!text) return;
+          const isAnnual = text.includes("연차");
+          const isEvent = text.includes("경조사");
+          const isTraining = text.includes("교육");
+          const names = extractNames([text]);
+          names.forEach((name) => {
+            if (!counts[name]) return;
+            if (isAnnual) {
+              annualDates[name].add(dateKey);
+            } else if (isEvent) {
+              eventDates[name].add(dateKey);
+            } else if (isTraining) {
+              trainingDates[name].add(dateKey);
+            } else {
+              etcDates[name].add(dateKey);
+              etcDetails[name].push(`${dateKey.slice(5)} ${text}`);
+            }
+          });
+        });
+      };
+      if (range) {
+        const startDate = new Date(range.start);
+        const endDate = new Date(range.end);
+        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+          const key = toDateString(d);
+          const offNames = String(offByDate[key] || "")
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean);
+          offNames.forEach((name) => {
+            if (!counts[name]) return;
+            counts[name].rest += 1;
+          });
+          collectMiscEntries(key);
+        }
+      } else {
+        Object.keys(miscByDate).forEach((key) => collectMiscEntries(key));
+      }
+      drivers.forEach((name) => {
+        if (!counts[name]) return;
+        counts[name].etc += etcDates[name].size;
+        counts[name].annual += annualDates[name].size;
+        counts[name].event += eventDates[name].size;
+        counts[name].training += trainingDates[name].size;
+      });
+      attBody.innerHTML = drivers
+        .map((name) => {
+          const entry =
+            counts[name] || { work: 0, rest: 0, etc: 0, annual: 0, event: 0, training: 0 };
+          const total =
+            entry.work + entry.rest + entry.etc + entry.annual + entry.event + entry.training;
+          const details = etcDetails[name] || [];
+          const detailText = details.length ? details.join("\n") : "-";
+          return `
+            <tr>
+              <td>${name}</td>
+              <td>${entry.work}</td>
+              <td>${entry.rest}</td>
+              <td>${entry.etc}</td>
+              <td>${entry.annual}</td>
+              <td>${entry.event}</td>
+              <td>${entry.training}</td>
+              <td class="att-detail">${detailText}</td>
+              <td>${total}</td>
+            </tr>
+          `;
+        })
+        .join("");
+    };
+
+    const initSelectors = () => {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const years = [];
+      for (let y = currentYear - 2; y <= currentYear + 1; y += 1) {
+        years.push(y);
+      }
+      attYear.innerHTML = years.map((y) => `<option value="${y}">${y}년</option>`).join("");
+      const months = Array.from({ length: 12 }, (_, i) => i + 1);
+      attMonth.innerHTML = months
+        .map((m) => `<option value="${String(m).padStart(2, "0")}">${m}월</option>`)
+        .join("");
+      attYear.value = String(currentYear);
+      attMonth.value = String(now.getMonth() + 1).padStart(2, "0");
+    };
+
+    initSelectors();
+    renderAttendance();
+    const updateMode = () => {
+      const isYearly = attMode?.value === "yearly";
+      if (attMonth) {
+        attMonth.disabled = isYearly;
+        attMonth.style.opacity = isYearly ? "0.6" : "1";
+      }
+    };
+    updateMode();
+    attYear.addEventListener("change", renderAttendance);
+    attMonth.addEventListener("change", renderAttendance);
+    if (attMode) {
+      attMode.addEventListener("change", () => {
+        updateMode();
+        renderAttendance();
+      });
+    }
+
+    const renderLoginMeta = () => {
+      const userEl = document.getElementById("login-user");
+      const timeEl = document.getElementById("login-time");
+      if (!userEl || !timeEl) return;
+
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+      let displayName = currentUser || "-";
+      let displayTitle = "";
+      try {
+        const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+        const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+        if (found) {
+          displayName = found.name || displayName;
+          displayTitle = found.title || "";
+        }
+      } catch (error) {
+      }
+      const titleText = displayTitle ? ` ${displayTitle}` : "";
+      userEl.textContent = `${displayName}${titleText}`;
+
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mi = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      timeEl.textContent = `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
+    };
+
+    renderLoginMeta();
+    setInterval(renderLoginMeta, 1000);
+  </script>
+  <script>
+    // office-menu-guard
+    (() => {
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+      let isAdmin = false;
+      if (currentUser) {
+        try {
+          const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+          const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+          isAdmin = Boolean(found && found.status === "관리자");
+        } catch (error) {
+          isAdmin = false;
+        }
+      }
+      if (isAdmin) return;
+      const targets = document.querySelectorAll('a[href="office-work.html"]');
+      targets.forEach((el) => {
+        el.style.display = "none";
+        el.setAttribute("aria-hidden", "true");
+        el.tabIndex = -1;
+      });
+    })();
+  </script>
+</body>
+</html>

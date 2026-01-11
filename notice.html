@@ -1,0 +1,689 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>(주)동특 | 공지사항</title>
+  <style>
+    :root {
+      --ink: #0e1a2b;
+      --deep: #0f223d;
+      --accent: #0b5fc1;
+      --accent-2: #5aa7e6;
+      --paper: #ffffff;
+      --mist: #f4f6f9;
+      --card: #ffffff;
+      --line: rgba(15, 23, 42, 0.08);
+      --shadow: 0 20px 50px rgba(12, 24, 42, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 380px at 15% 0%, rgba(11, 95, 193, 0.08), transparent 65%),
+        radial-gradient(700px 340px at 92% 5%, rgba(11, 95, 193, 0.08), transparent 60%),
+        linear-gradient(180deg, #fbfbfd 0%, #f2f4f8 55%, #edf1f6 100%);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      min-height: 100vh;
+    }
+
+                .sidebar {
+      width: 120px;
+      background: #ffffff;
+      border-right: 1px solid var(--line);
+      padding: 10px 6px 8px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo {
+      width: 100px;
+      height: auto;
+      display: block;
+      margin-bottom: 24px;
+    }
+
+            .menu {
+      margin-top: 16px;
+      display: grid;
+      gap: 8px;
+      flex: 1;
+    }
+
+            .menu a {
+      height: 36px;
+      line-height: 36px;
+      text-align: center;
+      text-decoration: none;
+      color: var(--deep);
+      padding: 0 10px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(15, 23, 42, 0.2);
+      transition: background 150ms ease, border 150ms ease;
+    }
+
+    .menu a.active {
+      background: rgba(11, 95, 193, 0.08);
+      border-color: rgba(11, 95, 193, 0.2);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .menu a:hover {
+      background: rgba(15, 23, 42, 0.04);
+      border-color: rgba(15, 23, 42, 0.06);
+    }
+
+    .main {
+      padding: 28px 32px 40px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 24px;
+      background: var(--accent);
+      color: #ffffff;
+      padding: 8px 18px;
+      border-radius: 20px;
+          min-height: 65px;      height: 65px;}
+
+    .page-header h1 {
+      margin: 0;
+      font-size: 22px;
+      color: #ffffff;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .control {
+      grid-column: span 4;
+      background: var(--card);
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .control label {
+      font-size: 12px;
+      color: rgba(14, 26, 43, 0.6);
+      min-width: 70px;
+    }
+
+    .control select,
+    .control input {
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 20px;
+      padding: 8px 10px;
+      font-size: 13px;
+      width: 100%;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .notice-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .notice-table th,
+    .notice-table td {
+      padding: 12px 10px;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+      text-align: left;
+    }
+
+    .notice-table th {
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      color: rgba(14, 26, 43, 0.6);
+    }
+
+    .notice-table tr:hover {
+      background: rgba(11, 95, 193, 0.04);
+    }
+
+    .notice-table a {
+      color: var(--deep);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .notice-table a:hover {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      background: rgba(239, 65, 54, 0.12);
+      color: #b1261d;
+      font-weight: 600;
+    }
+
+    .meta {
+      margin-top: 12px;
+      font-size: 12px;
+      color: rgba(14, 26, 43, 0.6);
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 120px 1fr;
+      }
+
+                  .sidebar {
+      background: #ffffff;
+      border-right: 1px solid var(--line);
+      padding: 10px 6px 8px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+              .menu {
+      display: grid;
+      gap: 8px;
+      flex: 1;
+    }
+
+      .main {
+        padding: 22px 18px 32px;
+      }
+
+      .control {
+        grid-column: span 12;
+      }
+    }
+    /* Pebble header */    .page-header {      background: var(--accent);      color: #ffffff;      padding: 8px 18px;      border-radius: 20px;      min-height: 65px;      height: 65px;      box-shadow: none;    }
+
+    .page-header h1 {
+      color: #ffffff;
+    }
+    .header-actions {
+      display: inline-flex;
+      gap: 8px;
+    }
+
+    .action-btn {
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    .logout-btn {
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }    /* Unified header size */    .page-header {      min-height: 65px;      height: 65px;      padding: 8px 18px;    }    .topbar {      min-height: 65px;      height: 65px;      padding: 8px 18px;    }  
+    /* Mobile layout */
+    @media (max-width: 720px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+        overflow-x: hidden;
+        padding: 6px;
+        flex-wrap: wrap;
+      }
+
+      .sidebar-footer {
+        display: none;
+      }
+
+      .logo {
+        width: 54px;
+        margin: 0;
+      }
+
+      .menu {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 2px;
+        margin-top: 2px;
+        width: 100%;
+        flex: 0 0 auto;
+        align-content: start;
+        grid-auto-rows: 18px;
+      }
+
+      .menu a {
+        white-space: normal;
+        font-size: 8px;
+        height: 18px;
+        line-height: 1;
+        padding: 0 1px;
+        border-radius: 8px;
+      }
+
+      .main {
+        padding: 6px 8px 12px;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .card {
+        border-radius: 16px;
+        padding: 12px;
+      }
+
+      .page-header,
+      .topbar {
+        flex-wrap: wrap;
+        gap: 8px;
+        height: auto;
+        min-height: 0;
+        padding: 6px 12px;
+      }
+
+      .page-header {
+        margin-bottom: 8px;
+      }
+
+      .controls {
+        margin-bottom: 8px;
+      }
+    }
+  
+    
+    
+    /* Unified mobile sidebar menu */
+    @media (max-width: 720px) {
+      .layout {
+        display: flex !important;
+        flex-direction: column !important;
+        min-height: 0 !important;
+        width: 100% !important;
+      }
+
+      .sidebar {
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        position: static !important;
+        top: auto !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        gap: 4px !important;
+        overflow-x: hidden !important;
+        padding: 6px !important;
+        flex-wrap: wrap !important;
+      }
+
+      .sidebar-footer {
+        display: none !important;
+      }
+
+      .logo {
+        width: 54px !important;
+        margin: 0 !important;
+      }
+
+      .menu {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 2px !important;
+        margin-top: 2px !important;
+        width: 100% !important;
+        flex: 0 0 auto !important;
+        align-content: start !important;
+        grid-auto-rows: 18px !important;
+      }
+
+      .menu a {
+        white-space: normal !important;
+        font-size: 8px !important;
+        height: 18px !important;
+        line-height: 1 !important;
+        padding: 0 1px !important;
+        border-radius: 8px !important;
+      }
+
+      .main {
+        width: 100% !important;
+        padding: 6px 8px 12px !important;
+      }
+
+      .page-header,
+      .topbar {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        height: auto !important;
+        min-height: 0 !important;
+        padding: 6px 12px !important;
+      }
+
+      .page-header {
+        margin-bottom: 8px !important;
+      }
+
+      .controls {
+        margin-bottom: 8px !important;
+      }
+    }
+</style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="second.html"><img class="logo" src="Dongteuk.png" alt="(주)동특 로고" /></a>
+      <nav class="menu" aria-label="주요 메뉴">
+        <a href="second.html">&#50629;&#47924;&#54788;&#54889;</a>
+        <a class="active" href="notice.html">공지사항</a>
+        <a href="dispatch.html">배차현황</a>
+        <a href="report.html">기사업무</a>
+        <a href="office-work.html">&#49324;&#47924;&#50629;&#47924;</a>
+        <a href="register-info.html">등록정보</a>
+        <a href="settings.html">설정</a>
+            
+      </nav>
+<div class="sidebar-footer">
+        <div class="login-meta">
+          <span id="login-user">-</span>
+          <span id="login-time">-</span>
+        </div>
+      </div></aside>
+
+    <main class="main">
+      <header class="page-header">
+        <h1>공지사항</h1>
+          <div class="header-actions">
+      <button class="action-btn" type="button" id="notice-write" onclick="location.href='notice-create.html'">글쓰기</button>
+      <button class="action-btn" type="button" id="notice-clear">전체 삭제</button>
+      <button class="action-btn" type="button" id="notice-delete-selected">선택 삭제</button>
+      <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); location.href='main.html'">로그아웃</button>
+    </div></header>
+
+      <section class="card">
+        <table class="notice-table">
+          <thead>
+            <tr>
+              <th style="width: 36px;">
+                <input type="checkbox" id="notice-select-all" aria-label="전체 선택" />
+              </th>
+              <th style="width: 70px;">번호</th>
+              <th>제목</th>
+              <th style="width: 90px;">작성자</th>
+              <th style="width: 110px;">등록일</th>
+              <th style="width: 70px;">조회</th>
+            </tr>
+          </thead>
+          <tbody id="notice-body"></tbody>
+        </table>
+        <div class="meta">최근 5건만 표시됩니다.</div>
+      </section>
+    </main>
+  </div>
+  <script>
+    const noticeBody = document.getElementById("notice-body");
+    const noticeClear = document.getElementById("notice-clear");
+    const noticeDeleteSelected = document.getElementById("notice-delete-selected");
+    const noticeSelectAll = document.getElementById("notice-select-all");
+
+    const readNotices = () => {
+      try {
+        const raw = localStorage.getItem("dongteukNotices") || "[]";
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    };
+
+    const renderNotices = () => {
+      if (!noticeBody) return;
+      const notices = readNotices().slice(0, 5);
+      if (!notices.length) {
+        noticeBody.innerHTML = `
+          <tr>
+            <td colspan="6">등록된 공지사항이 없습니다.</td>
+          </tr>
+        `;
+        if (noticeSelectAll) {
+          noticeSelectAll.checked = false;
+        }
+        return;
+      }
+      noticeBody.innerHTML = notices
+        .map((notice) => {
+          const tag = notice.category ? ` <span class="tag">${notice.category}</span>` : "";
+          const author = notice.author || "-";
+          const link = `notice-view.html?id=${notice.id}`;
+          return `
+            <tr>
+              <td><input type="checkbox" class="notice-select" data-id="${notice.id}" /></td>
+              <td>${notice.id || "-"}</td>
+              <td><a href="${link}">${notice.title || "-"}</a>${tag}</td>
+              <td>${author}</td>
+              <td>${notice.createdAt || "-"}</td>
+              <td>${notice.views || 0}</td>
+            </tr>
+          `;
+        })
+        .join("");
+    };
+
+    renderNotices();
+
+    if (noticeSelectAll) {
+      noticeSelectAll.addEventListener("change", () => {
+        const targets = document.querySelectorAll(".notice-select");
+        targets.forEach((input) => {
+          input.checked = noticeSelectAll.checked;
+        });
+      });
+    }
+
+    if (noticeDeleteSelected) {
+      noticeDeleteSelected.addEventListener("click", () => {
+        const checked = Array.from(document.querySelectorAll(".notice-select"))
+          .filter((input) => input.checked)
+          .map((input) => Number(input.dataset.id))
+          .filter((id) => Number.isFinite(id));
+        if (!checked.length) {
+          alert("선택된 공지사항이 없습니다.");
+          return;
+        }
+        const confirmed = confirm("선택한 공지사항을 삭제할까요?");
+        if (!confirmed) return;
+        const remaining = readNotices().filter((notice) => !checked.includes(Number(notice.id)));
+        localStorage.setItem("dongteukNotices", JSON.stringify(remaining));
+        new BroadcastChannel("dongteuk-sync").postMessage({ key: "dongteukNotices" });
+        renderNotices();
+        if (noticeSelectAll) noticeSelectAll.checked = false;
+      });
+    }
+
+    if (noticeClear) {
+      noticeClear.addEventListener("click", () => {
+        const confirmed = confirm("저장된 공지사항을 모두 삭제할까요?");
+        if (!confirmed) return;
+        localStorage.removeItem("dongteukNotices");
+        new BroadcastChannel("dongteuk-sync").postMessage({ key: "dongteukNotices" });
+        renderNotices();
+        alert("공지사항이 삭제되었습니다.");
+      });
+    }
+
+    const renderLoginMeta = () => {
+      const userEl = document.getElementById("login-user");
+      const timeEl = document.getElementById("login-time");
+      if (!userEl || !timeEl) return;
+
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+      let displayName = currentUser || "-";
+      let displayTitle = "";
+      try {
+        const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+        const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+        if (found) {
+          displayName = found.name || displayName;
+          displayTitle = found.title || "";
+        }
+      } catch (error) {
+      }
+      const titleText = displayTitle ? ` ${displayTitle}` : "";
+      userEl.textContent = `${displayName}${titleText}`;
+
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mi = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      timeEl.textContent = `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
+    };
+
+    renderLoginMeta();
+    setInterval(renderLoginMeta, 1000);
+  </script>
+  <script>
+    // admin-menu-guard
+    (() => {
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+      let isAdmin = false;
+      if (currentUser) {
+        try {
+          const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+          const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+          isAdmin = Boolean(found && found.status === "관리자");
+        } catch (error) {
+          isAdmin = false;
+        }
+      }
+      if (isAdmin) return;
+      const writeBtn = document.getElementById("notice-write");
+      const clearBtn = document.getElementById("notice-clear");
+      const deleteBtn = document.getElementById("notice-delete-selected");
+      [writeBtn, clearBtn, deleteBtn].forEach((btn) => {
+        if (!btn) return;
+        btn.style.display = "none";
+        btn.setAttribute("aria-hidden", "true");
+        btn.tabIndex = -1;
+      });
+      const targets = document.querySelectorAll(
+        'a[href="register-info.html"], a[href="dispatch-create.html"], a[href="office-work.html"]'
+      );
+      targets.forEach((el) => {
+        el.style.display = "none";
+        el.setAttribute("aria-hidden", "true");
+        el.tabIndex = -1;
+      });
+    })();
+  </script>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
