@@ -694,7 +694,16 @@
         text-align: center !important;
       }
     }
-    /* logo-layout-lock */
+    /* role-menu-guard */
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/register-info"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/dispatch-create"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/office-work"] {
+      display: none !important;
+    }
+      /* logo-layout-lock */
     .logo {
       width: 100px;
       height: 24px;
@@ -709,10 +718,733 @@
       }
     }
   </style>
+  <script>
+    // admin-class-boot
+    (() => {
+      const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      if (role === "admin" || role === "관리자") {
+        document.documentElement.classList.add("is-admin");
+        document.addEventListener("DOMContentLoaded", () => {
+          document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin");
+        });
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="/second"><img class="logo" width="100" height="24" src="Dongteuk.png" alt="(주)동특 로고" /></a>
+      <nav class="menu" aria-label="주요 메뉴">
+        <a href="/second">&#50629;&#47924;&#54788;&#54889;</a>
+        <a href="/notice">공지사항</a>
+        <a class="active" href="/dispatch">배차현황</a>
+        <a href="/report">기사업무</a>
+        <a href="/office-work">&#49324;&#47924;&#50629;&#47924;</a>
+        <a href="/register-info">등록정보</a>
+        <a href="/settings">설정</a>
+            
+      </nav>
+<div class="sidebar-footer">
+        <div class="login-meta">
+          <span id="login-user">-</span>
+          <span id="login-time">-</span>
+        </div>
+      </div></aside>
+
+    <main class="main">
+      <header class="page-header">
+        <h1>배차현황</h1>
+        <div class="date-filter">
+          <div class="date-control">
+            <button class="date-btn" type="button" id="date-prev" aria-label="이전 날짜">&#x2039;</button>
+            <input id="dispatch-date" type="date" />
+            <button class="date-btn" type="button" id="date-next" aria-label="다음 날짜">&#x203A;</button>
+          </div>
+          <span class="weekday" id="dispatch-weekday"></span>
+        </div>
+        <div class="header-actions">
+          <button class="action-btn" type="button" id="export-image">이미지 저장</button>
+          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">로그아웃</button>
+        </div>
+      </header>
+      <div id="dispatch-export">
+        <div class="meta" id="dispatch-meta">- 요일 · 총 0건</div>
+        <div class="meta meta-detail" id="dispatch-off">휴무자: -</div>
+        <div class="meta meta-detail" id="dispatch-misc">-</div>
+        <div class="meta meta-detail" id="dispatch-support" style="display:none;"></div>
+        <div class="notice" id="dispatch-notice" style="display:none;"></div>
+
+        <section class="card">
+          <div class="table-wrap">
+          <table class="excel-table">
+          <colgroup>
+            <col style="width: 28px;" />
+            <col style="width: 32px;" />
+            <col style="width: 80px;" />
+            <col style="width: 50px;" />
+            <col style="width: 44px;" />
+            <col style="width: 55px;" />
+            <col style="width: 55px;" />
+            <col style="width: 34px;" />
+            <col style="width: 70px;" />
+            <col style="width: 70px;" />
+            <col style="width: 100%;" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th class="product-head">PRO<br>DUCT</th>
+              <th>Size</th>
+              <th>차량번호</th>
+              <th class="lb-head">LB Cods</th>
+              <th>Vol</th>
+              <th>트랙터</th>
+              <th>특징</th>
+              <th>전일<br>사입</th>
+              <th>DRIVER</th>
+              <th>출발시간</th>
+              <th>작업</th>
+            </tr>
+          </thead>
+          <tbody id="dispatch-list"></tbody>
+          </table>
+          </div>
+          <div class="meta" id="dispatch-saved">배차등록시간: -</div>
+          <div class="meta" id="dispatch-updated">배차수정시간: -</div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script src="data-sync.js"></script>
+  <script>
+    const storageKey = "dongteukDispatches";
+    const listBody = document.getElementById("dispatch-list");
+    const meta = document.getElementById("dispatch-meta");
+    const offMeta = document.getElementById("dispatch-off");
+    const miscMeta = document.getElementById("dispatch-misc");
+    const supportMeta = document.getElementById("dispatch-support");
+    const savedMeta = document.getElementById("dispatch-saved");
+    const updatedMeta = document.getElementById("dispatch-updated");
+    let dispatchParseError = false;
+    const metaKey = "dongteukDispatchMeta";
+
+    const MAX_ROWS = Infinity;
+
+    const showNotice = (message, timeoutMs = 2500) => {
+      const notice = document.getElementById("dispatch-notice");
+      if (!notice) return;
+      notice.textContent = message;
+      notice.style.display = "block";
+      if (timeoutMs) {
+        setTimeout(() => {
+          notice.style.display = "none";
+        }, timeoutMs);
+      }
+    };
+
+    const normalizeDispatches = (value) => {
+      if (Array.isArray(value)) return value;
+      if (typeof value === "string") {
+        const trimmed = value.trim();
+        if (!trimmed) return null;
+        try {
+          const parsed = JSON.parse(trimmed);
+          return Array.isArray(parsed) ? parsed : null;
+        } catch (error) {
+          return null;
+        }
+      }
+      return null;
+    };
+
+    const tryParseDispatches = (raw) => {
+      try {
+        const parsed = JSON.parse(raw);
+        return normalizeDispatches(parsed) || parsed;
+      } catch (error) {
+        const trimmed = raw.trim();
+        const hasQuotes =
+          (trimmed.startsWith("'") && trimmed.endsWith("'")) ||
+          (trimmed.startsWith("\"") && trimmed.endsWith("\""));
+        if (!hasQuotes) return null;
+        try {
+          const parsed = JSON.parse(trimmed.slice(1, -1));
+          return normalizeDispatches(parsed) || parsed;
+        } catch (innerError) {
+          return null;
+        }
+      }
+    };
+
+    const readDispatches = () => {
+      dispatchParseError = false;
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return [];
+      const parsed = tryParseDispatches(raw);
+      if (Array.isArray(parsed)) {
+        const normalized = normalizeDispatches(parsed);
+        if (normalized && raw.trim().startsWith("'")) {
+          localStorage.setItem(storageKey, JSON.stringify(normalized));
+        }
+        return normalized || parsed;
+      }
+      if (typeof parsed === "string") {
+        const normalized = normalizeDispatches(parsed);
+        if (normalized) {
+          localStorage.setItem(storageKey, JSON.stringify(normalized));
+          return normalized;
+        }
+      }
+      dispatchParseError = true;
+      return [];
+    };
+
+    const readVehicles = () => {
+      try {
+        return JSON.parse(localStorage.getItem("dongteukVehicles") || "[]");
+      } catch (error) {
+        return [];
+      }
+    };
+
+    const sanitizeTaskHtml = (html) => {
+      const template = document.createElement("template");
+      template.innerHTML = html || "";
+      template.content.querySelectorAll("script, style").forEach((node) => node.remove());
+      template.content.querySelectorAll("*").forEach((node) => {
+        Array.from(node.attributes).forEach((attr) => {
+          if (attr.name.startsWith("on")) {
+            node.removeAttribute(attr.name);
+          }
+        });
+      });
+      return template.innerHTML;
+    };
+
+    const getSelectedDate = () => {
+      const input = document.getElementById("dispatch-date");
+      return input ? input.value : "";
+    };
+
+    const filterByDate = (rows, dateValue) => {
+      if (!dateValue) return rows;
+      return rows.filter((row) => {
+        if (row.dispatchDate) {
+          return row.dispatchDate === dateValue;
+        }
+        return row.savedAt && row.savedAt.startsWith(dateValue);
+      });
+    };
+
+    const updateSummary = (rows) => {
+      const total = rows.length;
+      const dateValue = dateInput ? dateInput.value : "";
+      const weekdayLabel = document.getElementById("dispatch-weekday");
+      const weekday = weekdayLabel ? weekdayLabel.textContent : "";
+      const dateText = dateValue ? dateValue.replace(/-/g, ".") : "-";
+      meta.textContent = `${dateText} ${weekday} · 총 ${total}건`;
+      const rawMeta = localStorage.getItem(metaKey);
+      if (!offMeta || !miscMeta || !supportMeta) return;
+      if (!rawMeta) {
+        offMeta.textContent = "휴무자: -";
+        miscMeta.textContent = "-";
+        miscMeta.style.display = "none";
+        supportMeta.textContent = "";
+        supportMeta.style.display = "none";
+        return;
+      }
+      try {
+        const parsed = JSON.parse(rawMeta);
+        const offList = parsed.offList ? parsed.offList.trim() : "-";
+        const miscNotes = Array.isArray(parsed.miscNotes) ? parsed.miscNotes : [];
+        const cleanedNotes = miscNotes
+          .map((note) => (note || "").trim())
+          .filter(Boolean);
+        const legacyNote = parsed.miscNote ? parsed.miscNote.trim() : "";
+        if (!cleanedNotes.length && legacyNote) {
+          cleanedNotes.push(legacyNote);
+        }
+        const extractNames = (values) => {
+          const names = [];
+          values.forEach((value) => {
+            value
+              .split(/[,\u002f]/)
+              .map((item) => item.trim())
+              .filter(Boolean)
+              .forEach((item) => {
+                const parts = item
+                  .split(/[:：]/)
+                  .map((part) => part.trim())
+                  .filter(Boolean);
+                if (parts.length > 1) {
+                  names.push(parts[parts.length - 1]);
+                } else {
+                  names.push(item);
+                }
+              });
+          });
+          return names;
+        };
+        const miscNames = new Set(extractNames(cleanedNotes));
+        const offNames = offList === "-" ? [] : offList.split(",").map((name) => name.trim());
+        const filteredOff = offNames.filter((name) => name && !miscNames.has(name));
+        const offText = filteredOff.length ? filteredOff.join(", ") : "-";
+        const supportPhone = parsed.supportPhone ? parsed.supportPhone.trim() : "";
+        const supportSystem = parsed.supportSystem ? parsed.supportSystem.trim() : "";
+        offMeta.textContent = `휴무자: ${offText}`;
+        const miscText = cleanedNotes.length ? cleanedNotes.join(" / ") : "-";
+        miscMeta.textContent = miscText;
+        miscMeta.style.display = cleanedNotes.length ? "block" : "none";
+        if (supportPhone || supportSystem) {
+          const parts = [];
+          if (supportPhone) parts.push(`전화응대 : ${supportPhone}`);
+          if (supportSystem) parts.push(`전산응대 : ${supportSystem}`);
+          supportMeta.textContent = parts.join(" - ");
+          supportMeta.style.display = "block";
+        } else {
+          supportMeta.textContent = "";
+          supportMeta.style.display = "none";
+        }
+      } catch (error) {
+        offMeta.textContent = "휴무자: -";
+        miscMeta.textContent = "-";
+        miscMeta.style.display = "none";
+        supportMeta.textContent = "";
+        supportMeta.style.display = "none";
+      }
+    };
+
+    const autoFitTableText = () => {
+      const cells = Array.from(listBody.querySelectorAll("td"));
+      cells.forEach((cell) => {
+        if (cell.classList.contains("availability-cell")) {
+          cell.style.fontSize = "";
+          return;
+        }
+        const isTractor = cell.classList.contains("tractor-cell");
+        const minSize = isTractor ? 6 : 8;
+        cell.style.fontSize = "";
+        const computed = window.getComputedStyle(cell);
+        let size = parseFloat(computed.fontSize) || 12;
+        let guard = 0;
+        while (cell.scrollWidth > cell.clientWidth && size > minSize && guard < 20) {
+          size -= 1;
+          cell.style.fontSize = `${size}px`;
+          guard += 1;
+        }
+      });
+    };
+
+    const getRowDate = (row) => {
+      if (row.dispatchDate) return row.dispatchDate;
+      if (row.savedAt) return row.savedAt.slice(0, 10);
+      return "";
+    };
+
+    const holidays = new Set([
+      "2026-01-01",
+      "2026-03-01",
+      "2026-05-05",
+      "2026-06-06",
+      "2026-08-15",
+      "2026-10-03",
+      "2026-10-09",
+      "2026-12-25",
+    ]);
+
+    const updateWeekday = (value) => {
+      const label = document.getElementById("dispatch-weekday");
+      if (!label) return;
+      if (!value) {
+        label.textContent = "";
+        label.classList.remove("saturday", "holiday");
+        return;
+      }
+      const [year, month, day] = value.split("-").map(Number);
+      const date = new Date(year, month - 1, day);
+      const names = ["일", "월", "화", "수", "목", "금", "토"];
+      label.textContent = `${names[date.getDay()]}요일`;
+      label.classList.toggle("saturday", date.getDay() === 6);
+      label.classList.toggle("holiday", holidays.has(value) || date.getDay() === 0);
+    };
+
+    const renderList = () => {
+      const all = readDispatches();
+      const vehicleFeatures = readVehicles().reduce((map, item) => {
+        if (item && item.number) {
+          map[item.number] = item.feature || "";
+        }
+        return map;
+      }, {});
+      let selectedDate = getSelectedDate();
+      let filtered = filterByDate(all, selectedDate);
+
+      if (dispatchParseError) {
+        showNotice("배차 데이터 형식이 올바르지 않습니다. 다시 저장해 주세요.", 3500);
+      }
+
+      if (!filtered.length && all.length) {
+        const latestDate = getRowDate(all[all.length - 1]);
+        if (dateInput && latestDate) {
+          dateInput.value = latestDate;
+          updateWeekday(latestDate);
+          selectedDate = latestDate;
+          filtered = filterByDate(all, selectedDate);
+        }
+      }
+
+      let rows = filtered.length ? filtered.slice(-MAX_ROWS) : [];
+
+      if (!rows.length && all.length) {
+        rows = [all[all.length - 1]];
+        showNotice("선택한 날짜의 배차가 없어 최신 배차를 표시합니다.", 3000);
+      }
+
+      updateSummary(filtered);
+      if (!rows.length) {
+        listBody.innerHTML = "<tr><td colspan=\"11\">등록된 배차가 없습니다.</td></tr>";
+        if (savedMeta) {
+          savedMeta.textContent = "배차등록시간: -";
+        }
+        if (updatedMeta) {
+          updatedMeta.textContent = "배차수정시간: -";
+        }
+        return;
+      }
+      const driverCounts = rows.reduce((map, row) => {
+        const name = row.driver || "";
+        if (name) {
+          map[name] = (map[name] || 0) + 1;
+        }
+        return map;
+      }, {});
+      const dupDrivers = new Set(
+        Object.keys(driverCounts).filter((name) => driverCounts[name] > 1)
+      );
+      const palette = [
+        "#f6e9b8",
+        "#d9f0d4",
+        "#d8e9ff",
+        "#f8e2c1",
+        "#d4efe6",
+        "#e2e9ff",
+        "#f4efd1",
+        "#dcefd9",
+      ];
+      const pickColor = (name) => {
+        let hash = 0;
+        for (let i = 0; i < name.length; i += 1) {
+          hash = (hash * 31 + name.charCodeAt(i)) % 2147483647;
+        }
+        return palette[hash % palette.length];
+      };
+
+      const latestSaved = rows
+        .map((row) => row.savedAt || "")
+        .filter(Boolean)
+        .sort()
+        .slice(-1)[0];
+      const rawMeta = localStorage.getItem(metaKey);
+      let createdAt = "";
+      let updatedAt = "";
+      let editorName = "";
+      let editorTitle = "";
+      if (rawMeta) {
+        try {
+          const parsed = JSON.parse(rawMeta);
+          if (parsed && parsed.date === selectedDate) {
+            createdAt = parsed.createdAt || "";
+            updatedAt = parsed.updatedAt || "";
+            editorName = parsed.editorName || "";
+            editorTitle = parsed.editorTitle || "";
+          }
+        } catch (error) {
+        }
+      }
+      const registerTime = createdAt || latestSaved;
+      const editorLabel = editorName
+        ? ` (${editorName}${editorTitle ? ` ${editorTitle}` : ""})`
+        : "";
+      if (savedMeta) {
+        if (registerTime) {
+          const label = registerTime.replace("T", " ").slice(0, 16);
+          savedMeta.textContent = `배차등록시간: ${label}${editorLabel}`;
+        } else {
+          savedMeta.textContent = "배차등록시간: -";
+        }
+      }
+      if (updatedMeta) {
+        if (updatedAt && updatedAt !== createdAt) {
+          const label = updatedAt.replace("T", " ").slice(0, 16);
+          updatedMeta.textContent = `배차수정시간: ${label}${editorLabel}`;
+        } else {
+          updatedMeta.textContent = "배차수정시간: -";
+        }
+      }
+      listBody.innerHTML = rows
+        .map((row, index) => {
+          const product = row.product || "";
+          const isGrouped = ["LIN", "LOX", "LAR"].includes(product);
+          const prevProduct = index > 0 ? rows[index - 1].product || "" : "";
+          const nextProduct = index < rows.length - 1 ? rows[index + 1].product || "" : "";
+          const isStart = isGrouped && product !== prevProduct;
+          const isEnd = isGrouped && product !== nextProduct;
+          const isChassis = row.vehicleType === "샤시";
+          const prevChassis = index > 0 && rows[index - 1].vehicleType === "샤시";
+          const nextChassis = index < rows.length - 1 && rows[index + 1].vehicleType === "샤시";
+          const chassisStart = isChassis && !prevChassis;
+          const chassisEnd = isChassis && !nextChassis;
+          const driverMemo = row.driverDuplicate ? ` (${row.driverDuplicate})` : "";
+          const driverName = row.driver || "";
+          const isDuplicate = driverName && dupDrivers.has(driverName);
+          const driverLabel = isDuplicate
+            ? `<span class="driver-dup" style="--dup-color: ${pickColor(driverName)}">${driverName}${driverMemo}</span>`
+            : `${driverName}${driverMemo}`;
+          const rowClass = isDuplicate ? "dup-row" : "";
+          const rowStyle = isDuplicate ? ` style="--dup-color: ${pickColor(driverName)}"` : "";
+          const groupClass = [
+            isStart ? "group-boundary-top" : "",
+            isEnd ? "group-boundary-bottom" : "",
+            isChassis ? "chassis-row" : "",
+            chassisStart ? "chassis-start" : "",
+            chassisEnd ? "chassis-end" : "",
+          ]
+            .filter(Boolean)
+            .join(" ");
+          const taskHtml = row.task ? sanitizeTaskHtml(row.task) : "";
+          const featureFromVehicle = row.vehicle ? vehicleFeatures[row.vehicle] || "" : "";
+          const availabilityText = featureFromVehicle || row.availability
+            ? sanitizeTaskHtml(featureFromVehicle || row.availability)
+            : "";
+          const allowText = row.availabilityAllow ? sanitizeTaskHtml(row.availabilityAllow) : "";
+          const denyText = row.availabilityDeny ? sanitizeTaskHtml(row.availabilityDeny) : "";
+          const legacyAvailability =
+            allowText || denyText ? `가능:${allowText || ""} / 금지:${denyText || ""}` : "";
+          const hasRegionName = (value) => {
+            if (!value) return false;
+            const text = String(value);
+            const regions = [
+              "서울특별시",
+              "서울",
+              "부산광역시",
+              "부산",
+              "대구광역시",
+              "대구",
+              "인천광역시",
+              "인천",
+              "광주광역시",
+              "광주",
+              "대전광역시",
+              "대전",
+              "울산광역시",
+              "울산",
+              "세종특별자치시",
+              "세종",
+              "경기도",
+              "강원도",
+              "충청북도",
+              "충북",
+              "충청남도",
+              "충남",
+              "전라북도",
+              "전북",
+              "전라남도",
+              "전남",
+              "경상북도",
+              "경북",
+              "경상남도",
+              "경남",
+              "제주특별자치도",
+              "제주",
+            ];
+            return regions.some((name) => text.includes(name));
+          };
+          const vehicleClass = hasRegionName(row.vehicle) ? "region-highlight" : "";
+          const tractorText = `${row.tractor || ""} ${row.tractorLb || ""}`.trim();
+          const tractorClass = hasRegionName(tractorText) ? "region-highlight" : "";
+          return `
+            <tr class="${[rowClass, groupClass].filter(Boolean).join(" ")}"${rowStyle}>
+              <td>${row.product || ""}</td>
+              <td>${row.size || ""}</td>
+              <td class="${vehicleClass}">${row.vehicle || ""}</td>
+              <td>${row.lb || ""}</td>
+              <td>${row.vol || ""}</td>
+              <td class="tractor-cell${row.tractor || row.tractorLb ? " has-tractor" : ""} ${tractorClass}">
+                ${row.tractor || ""}${row.tractorLb ? `<br>${row.tractorLb}` : ""}
+              </td>
+              <td class="availability-cell">${availabilityText || legacyAvailability}</td>
+              <td>${row.prevday || ""}</td>
+              <td>${driverLabel}</td>
+              <td>${row.departTime || ""}</td>
+              <td>${taskHtml}</td>
+            </tr>
+          `;
+        })
+        .join("");
+      autoFitTableText();
+    };
+
+    const dateInput = document.getElementById("dispatch-date");
+    const prevBtn = document.getElementById("date-prev");
+    const nextBtn = document.getElementById("date-next");
+    const getLocalDateString = (date = new Date()) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+
+    const moveDate = (delta) => {
+      if (!dateInput || !dateInput.value) return;
+      const [year, month, day] = dateInput.value.split("-").map(Number);
+      const date = new Date(year, month - 1, day);
+      date.setDate(date.getDate() + delta);
+      dateInput.value = getLocalDateString(date);
+      updateWeekday(dateInput.value);
+      renderList();
+    };
+
+    if (dateInput) {
+      dateInput.value = getLocalDateString();
+      updateWeekday(dateInput.value);
+      dateInput.addEventListener("change", renderList);
+      dateInput.addEventListener("change", () => updateWeekday(dateInput.value));
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener("click", () => moveDate(-1));
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => moveDate(1));
+    }
+
+    const showSavedNotice = () => {
+      const params = new URLSearchParams(window.location.search);
+      if (!params.has("saved")) return;
+      showNotice("배차등록이 완료되었습니다.", 2500);
+      const url = new URL(window.location.href);
+      url.searchParams.delete("saved");
+      window.history.replaceState({}, "", url.toString());
+    };
+
+    renderList();
+    showSavedNotice();
+
+    const channel = new BroadcastChannel("dongteuk-sync");
+    channel.addEventListener("message", (event) => {
+      if (event.data && event.data.key === storageKey) {
+        renderList();
+      }
+    });
+
+    const exportButton = document.getElementById("export-image");
+    const exportTarget = document.getElementById("dispatch-export");
+
+    const loadHtml2Canvas = () =>
+      new Promise((resolve, reject) => {
+        if (window.html2canvas) {
+          resolve(window.html2canvas);
+          return;
+        }
+        const script = document.createElement("script");
+        script.src =
+          "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js";
+        script.async = true;
+        script.onload = () => resolve(window.html2canvas);
+        script.onerror = () => reject(new Error("html2canvas load failed"));
+        document.head.appendChild(script);
+      });
+
+    const exportAsImage = async () => {
+      if (!exportTarget) return;
+      try {
+        if (document.fonts && document.fonts.ready) {
+          await document.fonts.ready;
+        }
+        const html2canvas = await loadHtml2Canvas();
+        const canvas = await html2canvas(exportTarget, {
+          backgroundColor: "#ffffff",
+          scale: 2,
+          useCORS: true,
+        });
+        const link = document.createElement("a");
+        const today = new Date().toISOString().slice(0, 10);
+        link.download = `동특천안배차-${today}.jpg`;
+        link.href = canvas.toDataURL("image/jpeg", 0.92);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      } catch (error) {
+        alert("이미지 저장에 실패했습니다. 인터넷 연결을 확인해 주세요.");
+      }
+    };
+
+    if (exportButton) {
+      exportButton.addEventListener("click", exportAsImage);
+    }
   
+    const renderLoginMeta = () => {
+      const userEl = document.getElementById("login-user");
+      const timeEl = document.getElementById("login-time");
+      if (!userEl || !timeEl) return;
+
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+      let displayName = currentUser || "-";
+      let displayTitle = "";
+      try {
+        const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+        const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+        if (found) {
+          displayName = found.name || displayName;
+          displayTitle = found.title || "";
+        }
+      } catch (error) {
+      }
+      const titleText = displayTitle ? ` ${displayTitle}` : "";
+      userEl.textContent = `${displayName}${titleText}`;
+
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mi = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      timeEl.textContent = `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
+    };
+
+    renderLoginMeta();
+    setInterval(renderLoginMeta, 1000);</script>
+  <script>
+    // admin-menu-guard
+    (() => {
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+            const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      let isAdmin = role === "admin" || role === "관리자";
+      if (currentUser) {
+        try {
+          const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+          const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+          isAdmin = Boolean(found && found.status === "관리자");
+        } catch (error) {
+          isAdmin = false;
+        }
+      }
+      if (isAdmin) { document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin"); return; }
+      const targets = document.querySelectorAll(
+        'a[href="/register-info"], a[href="/dispatch-create"], a[href="/office-work"]'
+      );
+      targets.forEach((el) => {
+        el.style.display = "none";
+        el.setAttribute("aria-hidden", "true");
+        el.tabIndex = -1;
+      });
+    })();
+  </script>
 
 </html>
-
 
 
 

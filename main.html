@@ -362,6 +362,15 @@
         min-height: 0;
       }
     }
+      /* role-menu-guard */
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/register-info"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/dispatch-create"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/office-work"] {
+      display: none !important;
+    }
       /* logo-layout-lock */
     .logo {
       width: 100px;
@@ -377,7 +386,19 @@
       }
     }
   </style>
-  
+  <script>
+    // admin-class-boot
+    (() => {
+      const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      if (role === "admin" || role === "관리자") {
+        document.documentElement.classList.add("is-admin");
+        document.addEventListener("DOMContentLoaded", () => {
+          document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin");
+        });
+      }
+    })();
+  </script>
 </head>
 <body>
   <header class="page-header" aria-label="회사 로고">
@@ -515,7 +536,6 @@
   </script>
 </body>
 </html>
-
 
 
 

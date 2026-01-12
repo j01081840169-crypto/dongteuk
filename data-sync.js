@@ -103,15 +103,6 @@
   };
 
   const run = async () => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("denied") === "1") {
-      alert("권한이 없습니다.");
-      params.delete("denied");
-      const nextUrl = params.toString()
-        ? `${window.location.pathname}?${params.toString()}`
-        : window.location.pathname;
-      window.history.replaceState({}, "", nextUrl);
-    }
     await loadSession();
     const changed = await fetchData();
     const reloadKey = "dongteukDataSyncReloaded";

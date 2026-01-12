@@ -510,7 +510,16 @@
         min-width: 820px;
       }
     }
-    /* logo-layout-lock */
+    /* role-menu-guard */
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/register-info"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/dispatch-create"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/office-work"] {
+      display: none !important;
+    }
+      /* logo-layout-lock */
     .logo {
       width: 100px;
       height: 24px;
@@ -525,10 +534,844 @@
       }
     }
   </style>
+  <script>
+    // admin-class-boot
+    (() => {
+      const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      if (role === "admin" || role === "관리자") {
+        document.documentElement.classList.add("is-admin");
+        document.addEventListener("DOMContentLoaded", () => {
+          document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin");
+        });
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="/second"><img class="logo" width="100" height="24" src="Dongteuk.png" alt="(주)동특 로고" /></a>
+      <nav class="menu" aria-label="주요 메뉴">
+        <a href="/second">&#50629;&#47924;&#54788;&#54889;</a>
+        <a href="/notice">공지사항</a>
+        <a href="/dispatch">배차현황</a>
+        <a href="/report">기사업무</a>
+        <a href="/office-work">&#49324;&#47924;&#50629;&#47924;</a>
+        <a class="active" href="/register-info">등록정보</a>
+        <a href="/settings">설정</a>
+            
+      </nav>
+<div class="sidebar-footer">
+        <div class="login-meta">
+          <span id="login-user">-</span>
+          <span id="login-time">-</span>
+        </div>
+      </div></aside>
+
+    <main class="main">
+      <header class="page-header">
+        <h1>등록정보</h1>
+        <div class="header-actions">
+          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">로그아웃</button>
+        </div>
+      </header>
+
+      <div class="info-tabs" aria-label="등록정보 탭">
+        <button class="info-tab-btn active" type="button" data-target="drivers">기사</button>
+        <button class="info-tab-btn" type="button" data-target="office">관리자</button>
+        <button class="info-tab-btn" type="button" data-target="vehicles">차량</button>
+        <button class="info-tab-btn" type="button" data-target="clients">거래처</button>
+      </div>
+
+      <div class="info-scroll">
+        <div class="card info-section active" data-section="drivers">
+          <div class="card-header">
+            <h2>기사</h2>
+            <button class="add-btn" type="button" data-type="drivers">추가</button>
+          </div>
+          <div class="meta" id="driver-count">등록 기사 0명</div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 90px;">이름</th>
+                <th style="width: 70px;">직급</th>
+                <th style="width: 90px;">동특사번</th>
+                <th style="width: 90px;">APK사번</th>
+                <th style="width: 120px;">핸드폰</th>
+                <th style="width: 120px;">모비폰</th>
+                <th style="width: 70px;">상태</th>
+                <th style="width: 140px;">관리</th>
+              </tr>
+            </thead>
+            <tbody id="driver-list"></tbody>
+          </table>
+        </div>
+
+        <div class="card info-section" data-section="office">
+          <div class="card-header">
+            <h2>관리자</h2>
+            <button class="add-btn" type="button" data-type="drivers" data-target="office">추가</button>
+          </div>
+          <div class="meta" id="office-count">등록 관리자 0명</div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 90px;">이름</th>
+                <th style="width: 70px;">직급</th>
+                <th style="width: 90px;">동특사번</th>
+                <th style="width: 90px;">APK사번</th>
+                <th style="width: 120px;">핸드폰</th>
+                <th style="width: 120px;">모비폰</th>
+                <th style="width: 70px;">상태</th>
+                <th style="width: 140px;">관리</th>
+              </tr>
+            </thead>
+            <tbody id="office-list"></tbody>
+          </table>
+        </div>
+
+        <div class="card info-section" data-section="vehicles">
+          <div class="card-header">
+            <h2>차량</h2>
+            <button class="add-btn" type="button" data-type="vehicles">추가</button>
+          </div>
+          <div class="meta" id="vehicle-count">등록 차량 0대</div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 90px;">Product</th>
+                <th>Size</th>
+                <th style="width: 120px;">차량번호</th>
+                <th>LB Cods</th>
+                <th>Vol</th>
+                <th>차량종류</th>
+                <th style="width: 140px;">특징</th>
+                <th style="width: 80px;">상태</th>
+                <th style="width: 70px;">관리</th>
+              </tr>
+            </thead>
+            <tbody id="vehicle-list"></tbody>
+          </table>
+        </div>
+
+        <div class="card info-section" data-section="clients">
+          <div class="card-header">
+            <h2>거래처</h2>
+            <button class="add-btn" type="button" data-type="clients">추가</button>
+          </div>
+          <div class="meta" id="client-count">등록 거래처 0곳</div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 160px;">거래처명</th>
+                <th>담당자</th>
+                <th>메모</th>
+                <th style="width: 70px;">관리</th>
+              </tr>
+            </thead>
+            <tbody id="client-list"></tbody>
+          </table>
+        </div>
+        <div class="meta">저장된 등록정보가 없으면 목록이 비어 보입니다.</div>
+      </div>
+    </main>
+  </div>
+  <script src="data-sync.js"></script>
+  <script>
+    const storageKeys = {
+      drivers: "dongteukDrivers",
+      vehicles: "dongteukVehicles",
+      clients: "dongteukClients",
+    };
+
+    const getLastFour = (value) => (value || "").replace(/\D/g, "").slice(-4);
+
+    const readList = (key) => {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : [];
+    };
+
+    const getNextDriverId = () => {
+      const list = readList(storageKeys.drivers);
+      let max = 0;
+      list.forEach((item) => {
+        const digits = (item.dongteukId || "").replace(/\D/g, "");
+        if (!digits) return;
+        const num = Number(digits);
+        if (!Number.isNaN(num) && num > max) {
+          max = num;
+        }
+      });
+      const next = max > 0 ? max + 1 : 1;
+      return String(next).padStart(5, "0");
+    };
+
+    const writeList = (key, list) => {
+      localStorage.setItem(key, JSON.stringify(list));
+      new BroadcastChannel("dongteuk-sync").postMessage({ key });
+    };
+
+    const seedVehicles = [
+      { product: "LIN", size: "3W", number: "울산80아3030", lb: "52W571", vol: "12500", type: "탱크로리", status: "사용" },
+      { product: "LIN", size: "5W", number: "94거4096", lb: "52W668", vol: "14400", type: "탱크로리", status: "사용" },
+      { product: "LIN", size: "5W", number: "84로7357", lb: "52W702", vol: "18000", type: "탱크로리", status: "사용" },
+      { product: "LIN", size: "5W", number: "97버1922", lb: "52W716", vol: "18000", type: "탱크로리", status: "사용" },
+      { product: "LIN", size: "5W", number: "81나0499", lb: "52W706", vol: "18000", type: "탱크로리", status: "사용" },
+      { product: "LIN", size: "5W", number: "85나1776", lb: "52W714", vol: "18000", type: "탱크로리", status: "사용" },
+      { product: "LIN", size: "5W", number: "97노4752", lb: "52W705", vol: "18000", type: "탱크로리", status: "사용" },
+      { product: "LIN", size: "5W", number: "97노4711", lb: "52W704", vol: "18000", type: "탱크로리", status: "사용" },
+      { product: "LIN", size: "5W", number: "94두0773", lb: "52W708", vol: "18000", type: "탱크로리", status: "사용" },
+      { product: "LIN", size: "5W", number: "94두0788", lb: "52W710", vol: "18000", type: "탱크로리", status: "사용" },
+      { product: "LIN", size: "5W", number: "울산81사2150", lb: "52W717", vol: "18000", type: "탱크로리", status: "사용" },
+      { product: "LIN", size: "5W", number: "94두0755", lb: "52W709", vol: "18000", type: "탱크로리", status: "사용" },
+      { product: "LIN", size: "ST", number: "90두4855", lb: "51W709", vol: "18000", type: "탱크로리", status: "사용" },
+      { product: "LIN", size: "ST", number: "91더1480", lb: "51W707", vol: "18000", type: "탱크로리", status: "사용" },
+      { product: "LIN", size: "ST", number: "85라5003", lb: "51W708", vol: "18000", type: "탱크로리", status: "사용" },
+      { product: "LOX", size: "L", number: "88소1140", lb: "52W360", vol: "10000", type: "탱크로리", status: "사용" },
+      { product: "LOX", size: "3W", number: "82모0932", lb: "52W563", vol: "16000", type: "탱크로리", status: "사용" },
+      { product: "LOX", size: "3W", number: "84로7322", lb: "52W558", vol: "17000", type: "탱크로리", status: "사용" },
+      { product: "LOX", size: "5W", number: "86너9100", lb: "52W551", vol: "17000", type: "탱크로리", status: "사용" },
+      { product: "LOX", size: "5W", number: "93머5019", lb: "52W552", vol: "17000", type: "탱크로리", status: "사용" },
+      { product: "LOX", size: "ST", number: "93고5666", lb: "51W714", vol: "20000", type: "탱크로리", status: "사용" },
+      { product: "LOX", size: "LT", number: "86서9330", lb: "51W516", vol: "18000", type: "탱크로리", status: "사용" },
+      { product: "LOX", size: "ST", number: "89가4902", lb: "51W718", vol: "20000", type: "탱크로리", status: "사용" },
+      { product: "LAR", size: "5W", number: "울산81사2149", lb: "52W451", vol: "18000", type: "탱크로리", status: "사용" },
+      { product: "LAR", size: "5W", number: "81나0411", lb: "52W453", vol: "17000", type: "탱크로리", status: "사용" },
+      { product: "LAR", size: "5W", number: "울산80아3041", lb: "52W454", vol: "19000", type: "탱크로리", status: "사용" },
+      { product: "LAR", size: "5W", number: "85도0533", lb: "52W703", vol: "18000", type: "탱크로리", status: "사용" },
+    ];
+
+    const seedDrivers = [
+      { name: "강현구", title: "책임", dongteukId: "15085", apkId: "997254", phone: "010 6415 6978", mobile: "010 5910 7039", status: "근무" },
+      { name: "곽호곤", title: "책임/파트장", dongteukId: "16059", apkId: "997256", phone: "010 8858 8585", mobile: "010 5920 9165", status: "근무" },
+      { name: "김광한", title: "책임", dongteukId: "19049", apkId: "812150", phone: "010 9444 1235", mobile: "010 5920 5527", status: "근무" },
+      { name: "김교돈", title: "책임", dongteukId: "22002", apkId: "997257", phone: "010 3546 3781", mobile: "010 5910 4344", status: "근무" },
+      { name: "김영식", title: "책임/파트장", dongteukId: "15072", apkId: "997258", phone: "010 9403 7569", mobile: "010 5920 4041", status: "근무" },
+      { name: "김원제", title: "책임", dongteukId: "16011", apkId: "997260", phone: "010 8962 3485", mobile: "010 5910 9178", status: "근무" },
+      { name: "김종식", title: "책임", dongteukId: "19041", apkId: "997261", phone: "010 3669 7590", mobile: "010 5920 9341", status: "근무" },
+      { name: "김필곤", title: "책임", dongteukId: "17039", apkId: "997499", phone: "010 3512 8954", mobile: "010 5910 6476", status: "근무" },
+      { name: "김효철", title: "기사", dongteukId: "21024", apkId: "816608", phone: "010 5233 8034", mobile: "010 5910 3154", status: "근무" },
+      { name: "나강일", title: "책임", dongteukId: "24034", apkId: "997252", phone: "010 5283 0417", mobile: "010 5910 8541", status: "근무" },
+      { name: "신동영", title: "책임", dongteukId: "17026", apkId: "997281", phone: "010 8811 3368", mobile: "010 5920 1373", status: "근무" },
+      { name: "유성열", title: "선임", dongteukId: "19025", apkId: "811121", phone: "010 6227 7758", mobile: "010 5298 7887", status: "근무" },
+      { name: "윤두호", title: "선임", dongteukId: "21027", apkId: "817046", phone: "010-7537-0436", mobile: "010 5920 9513", status: "근무" },
+      { name: "이경민", title: "책임/파트장", dongteukId: "15080", apkId: "976073", phone: "010 9026 0220", mobile: "010 5920 9516", status: "근무" },
+      { name: "이대엽", title: "책임/파트장", dongteukId: "16070", apkId: "997273", phone: "010 3558 4614", mobile: "010 5920 2059", status: "근무" },
+      { name: "이석봉", title: "책임", dongteukId: "18032", apkId: "998756", phone: "010 4443 0561", mobile: "010 5920 8094", status: "근무" },
+      { name: "이주영", title: "기사", dongteukId: "22010", apkId: "817676", phone: "010 5427 4695", mobile: "010 5920 8077", status: "근무" },
+      { name: "주찬우", title: "기사", dongteukId: "24019", apkId: "821646", phone: "010 7751 4180", mobile: "010 5920 8413", status: "근무" },
+      { name: "한심록", title: "기사", dongteukId: "22018", apkId: "818187", phone: "010 9501 1235", mobile: "010 5920 8550", status: "근무" },
+      { name: "현태수", title: "기사", dongteukId: "21021", apkId: "815961", phone: "010 8367 2281", mobile: "010 5920 8269", status: "근무" },
+      { name: "홍승표", title: "선임", dongteukId: "19030", apkId: "811117", phone: "010 9149 4800", mobile: "010 5920 9271", status: "근무" },
+      { name: "김민찬", title: "기사", dongteukId: "25008", apkId: "", phone: "010 7420 6323", mobile: "", status: "근무" },
+      { name: "조성표", title: "기사", dongteukId: "25009", apkId: "", phone: "010 8104 3390", mobile: "", status: "근무" },
+      { name: "김근영", title: "기사", dongteukId: "25013", apkId: "", phone: "010 7548 0404", mobile: "", status: "근무" },
+      { name: "정재호", title: "기사", dongteukId: "25012", apkId: "", phone: "010 8184 0169", mobile: "", status: "근무" },
+      { name: "심성민", title: "부장", dongteukId: "19009", apkId: "810532", phone: "010 7404 0029", mobile: "", status: "관리자" },
+      { name: "유미", title: "차장", dongteukId: "16079", apkId: "969832", phone: "010 5416 4566", mobile: "", status: "관리자" },
+      { name: "강윤아", title: "과장", dongteukId: "17036", apkId: "125561", phone: "010 8817 2475", mobile: "", status: "관리자" },
+      { name: "류성희", title: "차장", dongteukId: "15068", apkId: "997263", phone: "010 5456 9726", mobile: "안전관리자", status: "관리자" },
+      { name: "관리자", title: "관리자", dongteukId: "00000", apkId: "", phone: "", mobile: "", status: "관리자" },
+    ];
+
+    const seedVehicleData = () => {
+      const existing = readList(storageKeys.vehicles);
+      const known = new Set(existing.map((item) => item.number));
+      const merged = existing.slice();
+      seedVehicles.forEach((item) => {
+        if (!known.has(item.number)) {
+          merged.push(item);
+        }
+      });
+      if (merged.length !== existing.length) {
+        writeList(storageKeys.vehicles, merged);
+      }
+    };
+
+    seedVehicleData();
+
+    const seedDriverData = () => {
+      const existing = readList(storageKeys.drivers).map((item) => {
+        if (["심상묵", "유만", "강윤", "류성희"].includes(item.name)) {
+          return { ...item, status: "관리자" };
+        }
+        return item;
+      });
+      const keyOf = (item) => item.dongteukId || item.apkId || item.name;
+      const known = new Set(existing.map(keyOf));
+      const merged = existing.slice();
+      seedDrivers.forEach((item) => {
+        const key = keyOf(item);
+        if (!known.has(key)) {
+          merged.push(item);
+        }
+      });
+      if (merged.length !== existing.length) {
+        writeList(storageKeys.drivers, merged);
+      }
+    };
+
+    seedDriverData();
+
+    const getCurrentUser = () => (localStorage.getItem("dongteukCurrentUser") || "").trim();
+
+    const enforceAdminAccess = () => {
+      const currentUser = getCurrentUser();
+      if (!currentUser) {
+        alert("관리자만 접근 가능합니다.");
+        window.location.href = "/main";
+        return false;
+      }
+      const drivers = readList(storageKeys.drivers);
+      const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+      if (!found || found.status !== "관리자") {
+        alert("관리자만 접근 가능합니다.");
+        window.location.href = "/second";
+        return false;
+      }
+      return true;
+    };
+
+    enforceAdminAccess();
+
+    const renderList = (tbody, rows, colspan) => {
+      tbody.innerHTML = rows.length
+        ? rows.join("")
+        : `<tr><td colspan="${colspan}">등록된 정보가 없습니다.</td></tr>`;
+    };
+
+    const formatPhone = (value) => {
+      const digits = (value || "").replace(/\D/g, "");
+      if (digits.length === 11) {
+        return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+      }
+      if (digits.length === 10) {
+        return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+      }
+      return value || "-";
+    };
+
+    const buildDriverRow = (item, index) => `
+        <tr>
+          <td>${item.name || "-"}</td>
+          <td>${item.title || "-"}</td>
+          <td>${item.dongteukId || "-"}</td>
+          <td>${item.apkId || "-"}</td>
+          <td>${formatPhone(item.phone)}</td>
+          <td>${formatPhone(item.mobile)}</td>
+          <td>${item.status || "근무"}</td>
+          <td>
+            <div class="inline-actions">\n              <button class="edit-btn" type="button" data-type="drivers" data-index="${index}">수정</button>\n              <button class="edit-btn ghost-btn" type="button" data-action="delete" data-type="drivers" data-index="${index}">삭제</button>\n              <button class="edit-btn reset-btn" type="button" data-action="reset-password" data-type="drivers" data-index="${index}">비밀번호 초기화</button>\n            </div>
+          </td>
+        </tr>
+      `;
+
+    const vehicles = readList(storageKeys.vehicles).map((item, index) => {
+      return `
+        <tr>
+          <td>${item.product || "-"}</td>
+          <td>${item.size || "-"}</td>
+          <td>${item.number || "-"}</td>
+          <td>${item.lb || "-"}</td>
+          <td>${item.vol || "-"}</td>
+          <td>${item.type || "-"}</td>
+          <td>${item.feature || "-"}</td>
+          <td>${item.status || "-"}</td>
+          <td>
+            <div class=\"inline-actions\">
+              <button class=\"edit-btn\" type=\"button\" data-type=\"vehicles\" data-index=\"${index}\">수정</button>
+              <button class=\"edit-btn ghost-btn\" type=\"button\" data-action=\"delete\" data-type=\"vehicles\" data-index=\"${index}\">삭제</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+
+    const clients = readList(storageKeys.clients).map((item, index) => {
+      return `
+        <tr>
+          <td>${item.name || "-"}</td>
+          <td>${item.person || "-"}</td>
+          <td>${item.note || "-"}</td>
+          <td>
+            <div class=\"inline-actions\">
+              <button class=\"edit-btn\" type=\"button\" data-type=\"clients\" data-index=\"${index}\">수정</button>
+              <button class=\"edit-btn ghost-btn\" type=\"button\" data-action=\"delete\" data-type=\"clients\" data-index=\"${index}\">삭제</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+
+    const driverBody = document.getElementById("driver-list");
+    const officeBody = document.getElementById("office-list");
+    const vehicleBody = document.getElementById("vehicle-list");
+    const clientBody = document.getElementById("client-list");
+    const driverCount = document.getElementById("driver-count");
+    const officeCount = document.getElementById("office-count");
+    const vehicleCount = document.getElementById("vehicle-count");
+    const clientCount = document.getElementById("client-count");
+    const infoTabs = document.querySelectorAll(".info-tab-btn");
+    const infoSections = document.querySelectorAll(".info-section");
+
+    const initialDrivers = readList(storageKeys.drivers);
+    const driverRows = initialDrivers
+      .map((item, index) => ({ item, index }))
+      .filter(({ item }) => item.status !== "관리자")
+      .map(({ item, index }) => buildDriverRow(item, index));
+    const officeRows = initialDrivers
+      .map((item, index) => ({ item, index }))
+      .filter(({ item }) => item.status === "관리자")
+      .map(({ item, index }) => buildDriverRow(item, index));
+    renderList(driverBody, driverRows, 8);
+    renderList(officeBody, officeRows, 8);
+    renderList(vehicleBody, vehicles, 8);
+    renderList(clientBody, clients, 4);
+
+    const updateCounts = () => {
+      const allDrivers = readList(storageKeys.drivers);
+      const driverSize = allDrivers.filter((item) => item.status !== "관리자").length;
+      const officeSize = allDrivers.filter((item) => item.status === "관리자").length;
+      const vehicleSize = readList(storageKeys.vehicles).length;
+      const clientSize = readList(storageKeys.clients).length;
+      if (driverCount) driverCount.textContent = `등록 기사 ${driverSize}명`;
+      if (officeCount) officeCount.textContent = `등록 관리자 ${officeSize}명`;
+      if (vehicleCount) vehicleCount.textContent = `등록 차량 ${vehicleSize}대`;
+      if (clientCount) clientCount.textContent = `등록 거래처 ${clientSize}곳`;
+    };
+
+    updateCounts();
+
+    const activateSection = (target) => {
+      infoSections.forEach((section) => {
+        section.classList.toggle("active", section.dataset.section === target);
+      });
+      infoTabs.forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.target === target);
+      });
+    };
+
+    infoTabs.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.target;
+        if (target) {
+          activateSection(target);
+        }
+      });
+    });
+
+    const refresh = () => {
+      if (document.body.dataset.editing === "true") {
+        return;
+      }
+      const allDrivers = readList(storageKeys.drivers);
+      const driverRows = allDrivers
+        .map((item, index) => ({ item, index }))
+        .filter(({ item }) => item.status !== "관리자")
+        .map(({ item, index }) => buildDriverRow(item, index));
+      const officeRows = allDrivers
+        .map((item, index) => ({ item, index }))
+        .filter(({ item }) => item.status === "관리자")
+        .map(({ item, index }) => buildDriverRow(item, index));
+      const vehicleRows = readList(storageKeys.vehicles).map((item, index) => {
+        return `
+          <tr>
+          <td>${item.product || "-"}</td>
+          <td>${item.size || "-"}</td>
+          <td>${item.number || "-"}</td>
+          <td>${item.lb || "-"}</td>
+          <td>${item.vol || "-"}</td>
+          <td>${item.type || "-"}</td>
+          <td>${item.feature || "-"}</td>
+          <td>${item.status || "-"}</td>
+          <td>
+            <div class=\"inline-actions\">
+              <button class=\"edit-btn\" type=\"button\" data-type=\"vehicles\" data-index=\"${index}\">수정</button>
+              <button class=\"edit-btn ghost-btn\" type=\"button\" data-action=\"delete\" data-type=\"vehicles\" data-index=\"${index}\">삭제</button>
+            </div>
+          </td>
+          </tr>
+        `;
+      });
+      const clientRows = readList(storageKeys.clients).map((item, index) => {
+        return `
+          <tr>
+            <td>${item.name || "-"}</td>
+            <td>${item.person || "-"}</td>
+            <td>${item.note || "-"}</td>
+            <td>
+              <div class=\"inline-actions\">
+                <button class=\"edit-btn\" type=\"button\" data-type=\"clients\" data-index=\"${index}\">수정</button>
+                <button class=\"edit-btn ghost-btn\" type=\"button\" data-action=\"delete\" data-type=\"clients\" data-index=\"${index}\">삭제</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+    renderList(driverBody, driverRows, 8);
+      renderList(officeBody, officeRows, 8);
+      renderList(vehicleBody, vehicleRows, 8);
+      renderList(clientBody, clientRows, 4);
+      updateCounts();
+      document.body.dataset.editing = "false";
+    };
+
+    const setEditingState = (activeRow) => {
+      document.body.dataset.editing = "true";
+      const rows = document.querySelectorAll("tbody tr");
+      rows.forEach((row) => {
+        if (row !== activeRow) {
+          row.classList.add("row-disabled");
+        } else {
+          row.classList.remove("row-disabled");
+        }
+      });
+    };
+
+    const editRowHtml = (type, item, index) => {
+      if (type === "drivers") {
+        return `
+          <td><input class="cell-input" data-field="name" value="${item.name || ""}" /></td>
+          <td><input class="cell-input" data-field="title" value="${item.title || ""}" /></td>
+          <td><input class="cell-input" data-field="dongteukId" value="${item.dongteukId || ""}" /></td>
+          <td><input class="cell-input" data-field="apkId" value="${item.apkId || ""}" /></td>
+          <td><input class="cell-input" data-field="phone" value="${item.phone || ""}" /></td>
+          <td><input class="cell-input" data-field="mobile" value="${item.mobile || ""}" /></td>
+          <td>
+              <select class="cell-input" data-field="status">
+                <option value="">선택</option>
+                <option value="근무" ${item.status === "근무" ? "selected" : ""}>근무</option>
+                <option value="휴직" ${item.status === "휴직" ? "selected" : ""}>휴직</option>
+                <option value="관리자" ${item.status === "관리자" ? "selected" : ""}>관리자</option>
+              </select>
+          </td>
+          <td>
+            <div class="inline-actions">
+              <button class="edit-btn" type="button" data-action="save" data-type="drivers" data-index="${index}">저장</button>
+              <button class="edit-btn ghost-btn" type="button" data-action="cancel" data-type="drivers" data-index="${index}">취소</button>
+            </div>
+          </td>
+        `;
+      }
+
+      if (type === "vehicles") {
+        return `
+          <td>
+            <select class="cell-input" data-field="product">
+              <option value="">선택</option>
+              <option value="LIN" ${item.product === "LIN" ? "selected" : ""}>LIN</option>
+              <option value="LOX" ${item.product === "LOX" ? "selected" : ""}>LOX</option>
+              <option value="LAR" ${item.product === "LAR" ? "selected" : ""}>LAR</option>
+            </select>
+          </td>
+          <td>
+            <select class="cell-input" data-field="size">
+              <option value="">선택</option>
+              <option value="3W" ${item.size === "3W" ? "selected" : ""}>3W</option>
+              <option value="5W" ${item.size === "5W" ? "selected" : ""}>5W</option>
+              <option value="L" ${item.size === "L" ? "selected" : ""}>L</option>
+              <option value="ST" ${item.size === "ST" ? "selected" : ""}>ST</option>
+              <option value="LT" ${item.size === "LT" ? "selected" : ""}>LT</option>
+            </select>
+          </td>
+          <td><input class="cell-input" data-field="number" value="${item.number || ""}" /></td>
+          <td><input class="cell-input" data-field="lb" value="${item.lb || ""}" /></td>
+          <td><input class="cell-input" data-field="vol" value="${item.vol || ""}" /></td>
+          <td>
+            <select class="cell-input" data-field="type">
+              <option value="">선택</option>
+              <option value="탱크로리" ${item.type === "탱크로리" ? "selected" : ""}>탱크로리</option>
+              <option value="트랙터" ${item.type === "트랙터" ? "selected" : ""}>트랙터</option>
+              <option value="샤시" ${item.type === "샤시" ? "selected" : ""}>샤시</option>
+            </select>
+          </td>
+          <td><input class="cell-input" data-field="feature" value="${item.feature || ""}" /></td>
+          <td>
+            <select class="cell-input" data-field="status">
+              <option value="">선택</option>
+              <option value="사용" ${item.status === "사용" ? "selected" : ""}>사용</option>
+              <option value="미사용" ${item.status === "미사용" ? "selected" : ""}>미사용</option>
+            </select>
+          </td>
+          <td>
+            <div class="inline-actions">
+              <button class="edit-btn" type="button" data-action="save" data-type="vehicles" data-index="${index}">저장</button>
+              <button class="edit-btn ghost-btn" type="button" data-action="cancel" data-type="vehicles" data-index="${index}">취소</button>
+            </div>
+          </td>
+        `;
+      }
+
+      return `
+        <td><input class="cell-input" data-field="name" value="${item.name || ""}" /></td>
+        <td><input class="cell-input" data-field="person" value="${item.person || ""}" /></td>
+        <td><input class="cell-input" data-field="note" value="${item.note || ""}" /></td>
+        <td>
+          <div class="inline-actions">
+            <button class="edit-btn" type="button" data-action="save" data-type="clients" data-index="${index}">저장</button>
+            <button class="edit-btn ghost-btn" type="button" data-action="cancel" data-type="clients" data-index="${index}">취소</button>
+          </div>
+        </td>
+      `;
+    };
+
+    const applyEdit = (row, type, index) => {
+      const list = readList(storageKeys[type]);
+      const item = list[index];
+      if (!item) {
+        alert("수정할 항목을 찾을 수 없습니다.");
+        return;
+      }
+      row.dataset.editing = "true";
+      row.innerHTML = editRowHtml(type, item, index);
+      setEditingState(row);
+    };
+
+    const saveEdit = (row, type, index) => {
+      const list = readList(storageKeys[type]);
+      const isNew = index === -1;
+      const item = isNew ? {} : list[index];
+      if (!item) return;
+      const inputs = row.querySelectorAll(".cell-input");
+      const payload = {};
+      inputs.forEach((input) => {
+        payload[input.dataset.field] = input.value.trim();
+      });
+
+      let normalized = {};
+      if (type === "drivers") {
+        const autoId = !payload.dongteukId && isNew ? getNextDriverId() : "";
+        normalized = {
+          name: payload.name || "",
+          title: payload.title || "",
+          dongteukId: payload.dongteukId || autoId,
+          apkId: payload.apkId || "",
+          phone: payload.phone || "",
+          mobile: payload.mobile || "",
+          status: payload.status || "근무",
+        };
+      } else if (type === "vehicles") {
+        normalized = {
+          product: payload.product || "",
+          size: payload.size || "",
+          number: payload.number || "",
+          lb: payload.lb || "",
+          vol: payload.vol || "",
+          type: payload.type || "",
+          feature: payload.feature || "",
+          status: payload.status || "",
+        };
+      } else {
+        normalized = {
+          name: payload.name || "",
+          person: payload.person || "",
+          note: payload.note || "",
+        };
+      }
+
+      if (isNew) {
+        list.push(normalized);
+      } else {
+        list[index] = normalized;
+      }
+
+      writeList(storageKeys[type], list);
+      document.body.dataset.editing = "false";
+      refresh();
+    };
+
+    const newRowFor = (type) => {
+      if (type === "drivers") {
+        return {
+          name: "",
+          title: "",
+          dongteukId: "",
+          apkId: "",
+          phone: "",
+          mobile: "",
+          status: "근무",
+        };
+      }
+      if (type === "vehicles") {
+        return {
+          product: "",
+          size: "",
+          number: "",
+          lb: "",
+          vol: "",
+          type: "",
+          feature: "",
+          status: "",
+        };
+      }
+      return { name: "", person: "", note: "" };
+    };
+
+    document.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLButtonElement)) return;
+      if (!target.classList.contains("edit-btn")) return;
+
+      const type = target.dataset.type;
+      const index = Number(target.dataset.index);
+      const action = target.dataset.action || "edit";
+      const row = target.closest("tr");
+
+      if (!type || Number.isNaN(index) || !row) return;
+
+      if (action === "edit") {
+        if (!confirm("수정하시겠습니까?")) return;
+        applyEdit(row, type, index);
+        return;
+      }
+      if (action === "save") {
+        if (!confirm("저장하시겠습니까?")) return;
+        saveEdit(row, type, index);
+        return;
+      }
+      if (action === "delete") {
+        const list = readList(storageKeys[type]);
+        if (!list[index]) return;
+        if (!confirm("정말 삭제할까요?")) return;
+        list.splice(index, 1);
+        writeList(storageKeys[type], list);
+        refresh();
+        return;
+      }
+      if (action === "reset-password") {
+        const list = readList(storageKeys[type]);
+        const targetDriver = list[index];
+        if (!targetDriver || !targetDriver.name) {
+          alert("초기화할 기사를 찾을 수 없습니다.");
+          return;
+        }
+        if (!confirm(`${targetDriver.name} 기사님의 비밀번호를 초기화할까요?`)) return;
+        const resetPassword = "0000";
+        let passwords = {};
+        try {
+          passwords = JSON.parse(localStorage.getItem("dongteukPasswords") || "{}");
+        } catch (e) {
+          passwords = {};
+        }
+        passwords[targetDriver.name] = resetPassword;
+        localStorage.setItem("dongteukPasswords", JSON.stringify(passwords));
+        localStorage.removeItem(`dongteukFirstLogin:${targetDriver.name}`);
+        alert("비밀번호가 0000으로 초기화되었습니다. 다음 로그인 시 변경 안내가 표시됩니다.");
+        return;
+      }
+      if (action === "cancel") {
+        if (!confirm("취소하시겠습니까?")) return;
+        document.body.dataset.editing = "false";
+        refresh();
+      }
+    });
+
+    document.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLButtonElement)) return;
+      if (!target.classList.contains("add-btn")) return;
+      if (document.body.dataset.editing === "true") return;
+
+      const type = target.dataset.type;
+      if (!type) return;
+
+      let tbody = null;
+      const targetArea = target.dataset.target || "";
+      if (type === "drivers") {
+        tbody = targetArea === "office" ? officeBody : driverBody;
+      }
+      if (type === "vehicles") tbody = vehicleBody;
+      if (type === "clients") tbody = clientBody;
+      if (!tbody) return;
+
+      const row = document.createElement("tr");
+      const initialItem =
+        type === "drivers" && targetArea === "office"
+          ? { ...newRowFor("drivers"), status: "관리자" }
+          : newRowFor(type);
+      row.innerHTML = editRowHtml(type, initialItem, -1);
+      tbody.prepend(row);
+      setEditingState(row);
+    });
+
+    const channel = new BroadcastChannel("dongteuk-sync");
+    channel.addEventListener("message", (event) => {
+      if (event.data && Object.values(storageKeys).includes(event.data.key)) {
+        refresh();
+      }
+    });
+
+    window.addEventListener("storage", (event) => {
+      if (Object.values(storageKeys).includes(event.key)) {
+        refresh();
+      }
+    });
+
+    setInterval(refresh, 500);
   
+    const renderLoginMeta = () => {
+      const userEl = document.getElementById("login-user");
+      const timeEl = document.getElementById("login-time");
+      if (!userEl || !timeEl) return;
+
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+      let displayName = currentUser || "-";
+      let displayTitle = "";
+      try {
+        const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+        const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+        if (found) {
+          displayName = found.name || displayName;
+          displayTitle = found.title || "";
+        }
+      } catch (error) {
+      }
+      const titleText = displayTitle ? ` ${displayTitle}` : "";
+      userEl.textContent = `${displayName}${titleText}`;
+
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mi = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      timeEl.textContent = `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
+    };
+
+    renderLoginMeta();
+    setInterval(renderLoginMeta, 1000);</script>
+  <script>
+    // admin-menu-guard
+    (() => {
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+            const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      let isAdmin = role === "admin" || role === "관리자";
+      if (currentUser) {
+        try {
+          const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+          const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+          isAdmin = Boolean(found && found.status === "관리자");
+        } catch (error) {
+          isAdmin = false;
+        }
+      }
+      if (isAdmin) { document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin"); return; }
+      const targets = document.querySelectorAll(
+        'a[href="/register-info"], a[href="/dispatch-create"], a[href="/office-work"]'
+      );
+      targets.forEach((el) => {
+        el.style.display = "none";
+        el.setAttribute("aria-hidden", "true");
+        el.tabIndex = -1;
+      });
+    })();
+  </script>
 
 </html>
-
 
 
 

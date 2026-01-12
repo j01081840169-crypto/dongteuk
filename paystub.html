@@ -445,7 +445,16 @@ flex-direction: column;
         margin-bottom: 8px !important;
       }
     }
-    /* logo-layout-lock */
+    /* role-menu-guard */
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/register-info"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/dispatch-create"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/office-work"] {
+      display: none !important;
+    }
+      /* logo-layout-lock */
     .logo {
       width: 100px;
       height: 24px;
@@ -460,10 +469,324 @@ flex-direction: column;
       }
     }
   </style>
-  
+  <script>
+    // admin-class-boot
+    (() => {
+      const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      if (role === "admin" || role === "관리자") {
+        document.documentElement.classList.add("is-admin");
+        document.addEventListener("DOMContentLoaded", () => {
+          document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin");
+        });
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="/second"><img class="logo" width="100" height="24" src="Dongteuk.png" alt="(&#51452;&#46041;&#53945;&#32;&#47196;&#44256;)" /></a>
+      <nav class="menu" aria-label="&#51452;&#50836;&#32;&#47700;&#45684;">
+        <a href="/second">&#50629;&#47924;&#54788;&#54889;</a>
+        <a href="/notice">&#44277;&#51648;&#49324;&#54637;</a>
+        <a href="/dispatch">&#48176;&#52264;&#54788;&#54889;</a>
+        <a href="/report">&#44592;&#49324;&#50629;&#47924;</a>
+        <a href="/office-work">&#49324;&#47924;&#50629;&#47924;</a>
+        <a href="/register-info">&#46321;&#47197;&#51221;&#48372;</a>
+        <a href="/settings">&#49444;&#51221;</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="login-meta">
+          <span id="login-user">-</span>
+          <span id="login-time">-</span>
+        </div>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="page-header">
+        <h1>&#50900;&#44553;&#47749;&#49464;&#49436;</h1>
+        <div class="header-actions">
+          <button class="action-btn" type="button" onclick="location.href='/paystub-create'">?깅줉</button>
+          <button class="logout-btn" type="button" onclick="history.back()">?ㅻ줈媛湲?/button>
+          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">&#47196;&#44536;&#50500;&#50883;</button>
+        </div>
+      </header>
+      <section class="card">
+        <h2>?붽툒紐낆꽭??/h2>
+        <table class="paystub-table">
+          <thead>
+            <tr>
+              <th style="width: 90px;">?꾩썡</th>
+              <th style="width: 120px;">湲곗궗</th>
+              <th>?뚯씪</th>
+              <th style="width: 140px;">?쒕챸</th>
+              <th style="width: 90px;">?깅줉??/th>
+            </tr>
+          </thead>
+          <tbody id="paystub-list"></tbody>
+        </table>
+        <div class="meta" id="paystub-meta">-</div>
+      </section>
+    </main>
+  </div>
+  <div class="signature-modal" id="signature-modal" aria-hidden="true">
+    <div class="signature-dialog" role="dialog" aria-modal="true" aria-labelledby="signature-title">
+      <h3 id="signature-title">?쒕챸 ?뺤씤</h3>
+      <img id="signature-image" alt="?깅줉???쒕챸" />
+      <div class="signature-actions">
+        <button type="button" id="signature-cancel">痍⑥냼</button>
+        <button type="button" class="confirm" id="signature-confirm">?섎졊?뺤씤</button>
+      </div>
+    </div>
+  </div>
+  <script src="data-sync.js"></script>
+  <script>
+    const paystubList = document.getElementById("paystub-list");
+    const paystubMeta = document.getElementById("paystub-meta");
+    const signatureModal = document.getElementById("signature-modal");
+    const signatureImage = document.getElementById("signature-image");
+    const signatureCancel = document.getElementById("signature-cancel");
+    const signatureConfirm = document.getElementById("signature-confirm");
+    let pendingSignId = null;
+
+    const readPaystubs = () => {
+      try {
+        const raw = localStorage.getItem("dongteukPaystubs") || "[]";
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    };
+
+    const writePaystubs = (rows) => {
+      localStorage.setItem("dongteukPaystubs", JSON.stringify(rows));
+    };
+
+    const getCurrentUser = () => (localStorage.getItem("dongteukCurrentUser") || "").trim();
+    const readSignatureMap = () => {
+      try {
+        return JSON.parse(localStorage.getItem("dongteukSignatureImages") || "{}");
+      } catch (error) {
+        return {};
+      }
+    };
+
+    const dataUrlToBlob = (dataUrl) => {
+      const parts = String(dataUrl).split(",");
+      if (parts.length < 2) return null;
+      const header = parts[0];
+      const data = parts.slice(1).join(",");
+      const match = header.match(/data:(.*?);/);
+      const mime = match ? match[1] : "application/octet-stream";
+      const binary = atob(data);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i += 1) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return new Blob([bytes], { type: mime });
+    };
+
+    const openPaystubFile = (id) => {
+      const all = readPaystubs();
+      const item = all.find((row) => String(row.id) === String(id));
+      if (!item || !item.fileData) {
+        alert("泥⑤????뚯씪???놁뒿?덈떎.");
+        return;
+      }
+      try {
+        const blob = dataUrlToBlob(item.fileData);
+        if (!blob) throw new Error("blob");
+        const url = URL.createObjectURL(blob);
+        window.open(url, "_blank", "noopener");
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+      } catch (error) {
+        window.open(item.fileData, "_blank", "noopener");
+      }
+    };
+
+    const renderPaystubs = () => {
+      if (!paystubList) return;
+      const currentUser = getCurrentUser();
+      const all = readPaystubs();
+      const filtered = all.filter((item) => (item.driver || "").trim() === currentUser);
+      const seen = new Set();
+      const rows = [];
+      filtered.forEach((item) => {
+        const key = `${item.year || ""}-${item.month || ""}`;
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+        rows.push(item);
+      });
+      if (!rows.length) {
+        paystubList.innerHTML = "<tr><td colspan=\"5\">?깅줉???붽툒紐낆꽭?쒓? ?놁뒿?덈떎.</td></tr>";
+        if (paystubMeta) {
+          paystubMeta.textContent = "?깅줉 0嫄?(蹂몄씤 湲곗?)";
+        }
+        return;
+      }
+      paystubList.innerHTML = rows
+        .map((item) => {
+          const ym = `${item.year || "-"}-${item.month || "--"}`;
+          const fileName = item.fileName || "?뚯씪 蹂닿린";
+          const fileLink = item.fileData
+            ? `<button class="file-btn" type="button" data-id="${item.id}">${fileName}</button>`
+            : "-";
+          const signCell = item.fileData
+            ? item.signed
+              ? "<span>?섎졊?꾨즺</span>"
+              : `<button class="sign-btn" type="button" data-id="${item.id}">?섎졊?쒕챸?섍린</button>`
+            : "-";
+          return `
+            <tr>
+              <td>${ym}</td>
+              <td>${item.driver || "-"}</td>
+              <td>${fileLink}</td>
+              <td>${signCell}</td>
+              <td>${item.createdAt || "-"}</td>
+            </tr>
+          `;
+        })
+        .join("");
+      if (paystubMeta) {
+        paystubMeta.textContent = `?깅줉 ${rows.length}嫄?(蹂몄씤 湲곗?)`;
+      }
+    };
+
+    renderPaystubs();
+    const openSignatureModal = (dataUrl, id) => {
+      if (!signatureModal || !signatureImage) return;
+      pendingSignId = id;
+      signatureImage.src = dataUrl;
+      signatureModal.classList.add("open");
+      signatureModal.setAttribute("aria-hidden", "false");
+    };
+
+    const closeSignatureModal = () => {
+      if (!signatureModal || !signatureImage) return;
+      signatureModal.classList.remove("open");
+      signatureModal.setAttribute("aria-hidden", "true");
+      signatureImage.src = "";
+      pendingSignId = null;
+    };
+
+    if (signatureCancel) {
+      signatureCancel.addEventListener("click", closeSignatureModal);
+    }
+    if (signatureModal) {
+      signatureModal.addEventListener("click", (event) => {
+        if (event.target === signatureModal) {
+          closeSignatureModal();
+        }
+      });
+    }
+    if (signatureConfirm) {
+      signatureConfirm.addEventListener("click", () => {
+        if (!pendingSignId) return;
+        const list = readPaystubs();
+        const idx = list.findIndex((item) => String(item.id) === String(pendingSignId));
+        if (idx < 0) {
+          closeSignatureModal();
+          return;
+        }
+        list[idx].signed = true;
+        list[idx].signedAt = new Date().toISOString();
+        if (signatureImage?.src) {
+          list[idx].signedImage = signatureImage.src;
+        }
+        writePaystubs(list);
+        closeSignatureModal();
+        renderPaystubs();
+      });
+    }
+    if (paystubList) {
+      paystubList.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLButtonElement)) return;
+        if (!target.classList.contains("file-btn")) return;
+        const id = target.dataset.id;
+        if (id) {
+          openPaystubFile(id);
+        }
+      });
+      paystubList.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLButtonElement)) return;
+        if (!target.classList.contains("sign-btn")) return;
+        const id = target.dataset.id;
+        if (!id) return;
+        const currentUser = getCurrentUser();
+        const signatureMap = readSignatureMap();
+        const signatureData = signatureMap[currentUser] || "";
+        if (!signatureData) {
+          alert("?ㅼ젙?먯꽌 ?쒕챸?대?吏瑜??깅줉??二쇱꽭??");
+          return;
+        }
+        openSignatureModal(signatureData, id);
+      });
+    }
+
+    const renderLoginMeta = () => {
+      const userEl = document.getElementById("login-user");
+      const timeEl = document.getElementById("login-time");
+      if (!userEl || !timeEl) return;
+
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+      let displayName = currentUser || "-";
+      let displayTitle = "";
+      try {
+        const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+        const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+        if (found) {
+          displayName = found.name || displayName;
+          displayTitle = found.title || "";
+        }
+      } catch (error) {
+      }
+      const titleText = displayTitle ? ` ${displayTitle}` : "";
+      userEl.textContent = `${displayName}${titleText}`;
+
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const hh = String(now.getHours()).padStart(2, "0");
+      const min = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      timeEl.textContent = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+    };
+
+    renderLoginMeta();
+    setInterval(renderLoginMeta, 1000);
+  </script>
+  <script>
+    // office-menu-guard
+    (() => {
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+            const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      let isAdmin = role === "admin" || role === "관리자";
+      if (currentUser) {
+        try {
+          const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+          const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+          isAdmin = Boolean(found && found.status === "愿由ъ옄");
+        } catch (error) {
+          isAdmin = false;
+        }
+      }
+      if (isAdmin) { document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin"); return; }
+      const targets = document.querySelectorAll('a[href="/office-work"]');
+      targets.forEach((el) => {
+        el.style.display = "none";
+        el.setAttribute("aria-hidden", "true");
+        el.tabIndex = -1;
+      });
+    })();
+  </script>
 </body>
 </html>
-
 
 
 

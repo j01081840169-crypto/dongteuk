@@ -342,7 +342,16 @@
         margin-bottom: 8px !important;
       }
     }
-    /* logo-layout-lock */
+    /* role-menu-guard */
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/register-info"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/dispatch-create"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/office-work"] {
+      display: none !important;
+    }
+      /* logo-layout-lock */
     .logo {
       width: 100px;
       height: 24px;
@@ -357,10 +366,403 @@
       }
     }
   </style>
-  
+  <script>
+    // admin-class-boot
+    (() => {
+      const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      if (role === "admin" || role === "관리자") {
+        document.documentElement.classList.add("is-admin");
+        document.addEventListener("DOMContentLoaded", () => {
+          document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin");
+        });
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="/second"><img class="logo" width="100" height="24" src="Dongteuk.png" alt="(二??숉듅 濡쒓퀬" /></a>
+      <nav class="menu" aria-label="二쇱슂 硫붾돱">
+        <a href="/second">&#50629;&#47924;&#54788;&#54889;</a>
+        <a href="/notice">怨듭??ы빆</a>
+        <a href="/dispatch">諛곗감?꾪솴</a>
+        <a href="/report">湲곗궗?낅Т</a>
+        <a class="active" href="/office-work">&#49324;&#47924;&#50629;&#47924;</a>
+        <a href="/register-info">?깅줉?뺣낫</a>
+        <a href="/settings">?ㅼ젙</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="login-meta">
+          <span id="login-user">-</span>
+          <span id="login-time">-</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <h1>洹쇳깭議고쉶</h1>
+        <div class="header-actions">
+          <button class="logout-btn" type="button" onclick="history.back()">?ㅻ줈媛湲?/button>
+          <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">濡쒓렇?꾩썐</button>
+        </div>
+      </header>
+
+      <section class="card">
+        <div class="filters">
+          <label for="att-mode">援щ텇</label>
+          <select id="att-mode">
+            <option value="monthly" selected>?붽컙</option>
+            <option value="yearly">?곌컙</option>
+          </select>
+          <label for="att-year">??/label>
+          <select id="att-year"></select>
+          <label for="att-month">??/label>
+          <select id="att-month"></select>
+        </div>
+        <div class="table-wrap">
+          <table class="attendance-table">
+            <thead>
+              <tr>
+                <th>湲곗궗</th>
+                <th>異쒓렐</th>
+                <th>?대Т</th>
+                <th>湲고?</th>
+                <th>?곗감</th>
+                <th>寃쎌“??/th>
+                <th>援먯쑁</th>
+                <th>湲고??댁뿭</th>
+                <th>珥앹씪??/th>
+              </tr>
+            </thead>
+            <tbody id="att-body"></tbody>
+          </table>
+        </div>
+        <div class="meta" id="att-range">-</div>
+      </section>
+    </main>
+  </div>
+  <script src="data-sync.js"></script>
+  <script>
+    const attBody = document.getElementById("att-body");
+    const attMode = document.getElementById("att-mode");
+    const attYear = document.getElementById("att-year");
+    const attMonth = document.getElementById("att-month");
+    const attRange = document.getElementById("att-range");
+
+    const readDrivers = () => {
+      try {
+        const raw = localStorage.getItem("dongteukDrivers") || "[]";
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed)
+          ? parsed.filter((item) => item.status !== "愿由ъ옄")
+          : [];
+      } catch (error) {
+        return [];
+      }
+    };
+
+    const readDispatches = () => {
+      try {
+        const raw = localStorage.getItem("dongteukDispatches") || "[]";
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    };
+
+    const readOffByDate = () => {
+      try {
+        return JSON.parse(localStorage.getItem("dongteukOffByDate") || "{}");
+      } catch (error) {
+        return {};
+      }
+    };
+
+    const readMiscByDate = () => {
+      try {
+        return JSON.parse(localStorage.getItem("dongteukMiscByDate") || "{}");
+      } catch (error) {
+        return {};
+      }
+    };
+
+    const toDateString = (date) => {
+      const yyyy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, "0");
+      const dd = String(date.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    };
+
+    const getMonthRange = (year, month) => {
+      const y = Number(year);
+      const m = Number(month);
+      if (!y || !m) return null;
+      const start = new Date(y, m - 1, 1);
+      const end = new Date(y, m, 0);
+      return { start: toDateString(start), end: toDateString(end) };
+    };
+
+    const getYearRange = (year) => {
+      const y = Number(year);
+      if (!y) return null;
+      const start = new Date(y, 0, 1);
+      const end = new Date(y, 11, 31);
+      return { start: toDateString(start), end: toDateString(end) };
+    };
+
+    const extractNames = (values) => {
+      const names = [];
+      values.forEach((value) => {
+        value
+          .split(/[,\u002f]/)
+          .map((item) => item.trim())
+          .filter(Boolean)
+          .forEach((item) => {
+            const parts = item
+              .split(/[:竊?/)
+              .map((part) => part.trim())
+              .filter(Boolean);
+            if (parts.length > 1) {
+              names.push(parts[parts.length - 1]);
+            } else {
+              names.push(item);
+            }
+          });
+      });
+      return names;
+    };
+
+    const renderAttendance = () => {
+      if (!attBody || !attYear || !attMonth) return;
+      const year = attYear.value;
+      const month = attMonth.value;
+      const isYearly = attMode?.value === "yearly";
+      const range = isYearly ? getYearRange(year) : getMonthRange(year, month);
+      if (attRange) {
+        if (range) {
+          const label = isYearly ? "?곌컙" : "?붽컙";
+          attRange.textContent = `${label} ${range.start} ~ ${range.end} 議고쉶`;
+          attRange.style.display = "block";
+        } else {
+          attRange.textContent = "-";
+          attRange.style.display = "none";
+        }
+      }
+      const drivers = readDrivers()
+        .map((item) => item.name)
+        .filter(Boolean);
+      if (!drivers.length) {
+        attBody.innerHTML = "<tr><td colspan=\"9\">?깅줉??湲곗궗媛 ?놁뒿?덈떎.</td></tr>";
+        return;
+      }
+      const rows = readDispatches();
+      const offByDate = readOffByDate();
+      const counts = drivers.reduce((map, name) => {
+        map[name] = { work: 0, rest: 0, etc: 0, annual: 0, event: 0, training: 0 };
+        return map;
+      }, {});
+      const miscByDate = readMiscByDate();
+      const etcDates = drivers.reduce((map, name) => {
+        map[name] = new Set();
+        return map;
+      }, {});
+      const annualDates = drivers.reduce((map, name) => {
+        map[name] = new Set();
+        return map;
+      }, {});
+      const eventDates = drivers.reduce((map, name) => {
+        map[name] = new Set();
+        return map;
+      }, {});
+      const trainingDates = drivers.reduce((map, name) => {
+        map[name] = new Set();
+        return map;
+      }, {});
+      const etcDetails = drivers.reduce((map, name) => {
+        map[name] = [];
+        return map;
+      }, {});
+      const filtered = range
+        ? rows.filter((row) => row.dispatchDate >= range.start && row.dispatchDate <= range.end)
+        : rows.filter((row) => row.dispatchDate);
+      filtered.forEach((row) => {
+        const name = (row.driver || "").trim();
+        if (!name || !counts[name]) return;
+        counts[name].work += 1;
+      });
+      const collectMiscEntries = (dateKey) => {
+        const notes = Array.isArray(miscByDate[dateKey]) ? miscByDate[dateKey] : [];
+        notes.forEach((note) => {
+          const text = String(note || "").trim();
+          if (!text) return;
+          const isAnnual = text.includes("?곗감");
+          const isEvent = text.includes("寃쎌“??);
+          const isTraining = text.includes("援먯쑁");
+          const names = extractNames([text]);
+          names.forEach((name) => {
+            if (!counts[name]) return;
+            if (isAnnual) {
+              annualDates[name].add(dateKey);
+            } else if (isEvent) {
+              eventDates[name].add(dateKey);
+            } else if (isTraining) {
+              trainingDates[name].add(dateKey);
+            } else {
+              etcDates[name].add(dateKey);
+              etcDetails[name].push(`${dateKey.slice(5)} ${text}`);
+            }
+          });
+        });
+      };
+      if (range) {
+        const startDate = new Date(range.start);
+        const endDate = new Date(range.end);
+        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+          const key = toDateString(d);
+          const offNames = String(offByDate[key] || "")
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean);
+          offNames.forEach((name) => {
+            if (!counts[name]) return;
+            counts[name].rest += 1;
+          });
+          collectMiscEntries(key);
+        }
+      } else {
+        Object.keys(miscByDate).forEach((key) => collectMiscEntries(key));
+      }
+      drivers.forEach((name) => {
+        if (!counts[name]) return;
+        counts[name].etc += etcDates[name].size;
+        counts[name].annual += annualDates[name].size;
+        counts[name].event += eventDates[name].size;
+        counts[name].training += trainingDates[name].size;
+      });
+      attBody.innerHTML = drivers
+        .map((name) => {
+          const entry =
+            counts[name] || { work: 0, rest: 0, etc: 0, annual: 0, event: 0, training: 0 };
+          const total =
+            entry.work + entry.rest + entry.etc + entry.annual + entry.event + entry.training;
+          const details = etcDetails[name] || [];
+          const detailText = details.length ? details.join("\n") : "-";
+          return `
+            <tr>
+              <td>${name}</td>
+              <td>${entry.work}</td>
+              <td>${entry.rest}</td>
+              <td>${entry.etc}</td>
+              <td>${entry.annual}</td>
+              <td>${entry.event}</td>
+              <td>${entry.training}</td>
+              <td class="att-detail">${detailText}</td>
+              <td>${total}</td>
+            </tr>
+          `;
+        })
+        .join("");
+    };
+
+    const initSelectors = () => {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const years = [];
+      for (let y = currentYear - 2; y <= currentYear + 1; y += 1) {
+        years.push(y);
+      }
+      attYear.innerHTML = years.map((y) => `<option value="${y}">${y}??/option>`).join("");
+      const months = Array.from({ length: 12 }, (_, i) => i + 1);
+      attMonth.innerHTML = months
+        .map((m) => `<option value="${String(m).padStart(2, "0")}">${m}??/option>`)
+        .join("");
+      attYear.value = String(currentYear);
+      attMonth.value = String(now.getMonth() + 1).padStart(2, "0");
+    };
+
+    initSelectors();
+    renderAttendance();
+    const updateMode = () => {
+      const isYearly = attMode?.value === "yearly";
+      if (attMonth) {
+        attMonth.disabled = isYearly;
+        attMonth.style.opacity = isYearly ? "0.6" : "1";
+      }
+    };
+    updateMode();
+    attYear.addEventListener("change", renderAttendance);
+    attMonth.addEventListener("change", renderAttendance);
+    if (attMode) {
+      attMode.addEventListener("change", () => {
+        updateMode();
+        renderAttendance();
+      });
+    }
+
+    const renderLoginMeta = () => {
+      const userEl = document.getElementById("login-user");
+      const timeEl = document.getElementById("login-time");
+      if (!userEl || !timeEl) return;
+
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+      let displayName = currentUser || "-";
+      let displayTitle = "";
+      try {
+        const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+        const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+        if (found) {
+          displayName = found.name || displayName;
+          displayTitle = found.title || "";
+        }
+      } catch (error) {
+      }
+      const titleText = displayTitle ? ` ${displayTitle}` : "";
+      userEl.textContent = `${displayName}${titleText}`;
+
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mi = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      timeEl.textContent = `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
+    };
+
+    renderLoginMeta();
+    setInterval(renderLoginMeta, 1000);
+  </script>
+  <script>
+    // office-menu-guard
+    (() => {
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+            const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      let isAdmin = role === "admin" || role === "관리자";
+      if (currentUser) {
+        try {
+          const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+          const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+          isAdmin = Boolean(found && found.status === "愿由ъ옄");
+        } catch (error) {
+          isAdmin = false;
+        }
+      }
+      if (isAdmin) { document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin"); return; }
+      const targets = document.querySelectorAll('a[href="/office-work"]');
+      targets.forEach((el) => {
+        el.style.display = "none";
+        el.setAttribute("aria-hidden", "true");
+        el.tabIndex = -1;
+      });
+    })();
+  </script>
 </body>
 </html>
-
 
 
 

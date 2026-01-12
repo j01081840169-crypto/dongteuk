@@ -499,7 +499,16 @@ flex-direction: column;
         margin-bottom: 8px !important;
       }
     }
-    /* logo-layout-lock */
+    /* role-menu-guard */
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/register-info"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/dispatch-create"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/office-work"] {
+      display: none !important;
+    }
+      /* logo-layout-lock */
     .logo {
       width: 100px;
       height: 24px;
@@ -514,10 +523,635 @@ flex-direction: column;
       }
     }
   </style>
-  
+  <script>
+    // admin-class-boot
+    (() => {
+      const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      if (role === "admin" || role === "관리자") {
+        document.documentElement.classList.add("is-admin");
+        document.addEventListener("DOMContentLoaded", () => {
+          document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin");
+        });
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="/second"><img class="logo" width="100" height="24" src="Dongteuk.png" alt="(&#51452;&#46041;&#53945;&#32;&#47196;&#44256;)" /></a>
+      <nav class="menu" aria-label="&#51452;&#50836;&#32;&#47700;&#45684;">
+        <a href="/second">&#50629;&#47924;&#54788;&#54889;</a>
+        <a href="/notice">&#44277;&#51648;&#49324;&#54637;</a>
+        <a href="/dispatch">&#48176;&#52264;&#54788;&#54889;</a>
+        <a href="/report">&#44592;&#49324;&#50629;&#47924;</a>
+        <a href="/office-work">&#49324;&#47924;&#50629;&#47924;</a>
+        <a href="/register-info">&#46321;&#47197;&#51221;&#48372;</a>
+        <a href="/settings">&#49444;&#51221;</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="login-meta">
+          <span id="login-user">-</span>
+          <span id="login-time">-</span>
+        </div>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="page-header">
+        <h1>&#52397;&#44396;&#51312;&#54924;</h1>
+        <div class="header-actions">
+                    <button class="logout-btn" type="button" onclick="history.back()">뒤로가기</button>
+<button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">&#47196;&#44536;&#50500;&#50883;</button>
+        </div>
+      </header>
+      <div class="filter-bar">
+        <label for="claim-year">&#45380;&#50900;</label>
+        <select id="claim-year">
+          <option value="">&#45380;</option>
+        </select>
+        <select id="claim-month">
+          <option value="">&#50900;</option>
+        </select>
+        <label for="claim-driver">&#44592;&#49324;&#51060;&#47492;</label>
+        <select id="claim-driver">
+          <option value="">&#51204;&#52404;</option>
+        </select>
+      </div>
+      <section class="card">
+        <h2>&#52397;&#44396;&#51312;&#54924;</h2>
+        <div class="claim-actions">
+          <button type="button" class="claim-approve-btn" id="claim-approve">&#52397;&#44396;&#49849;&#51064;</button>
+          <button type="button" class="claim-reject-btn" id="claim-reject">&#52397;&#44396;&#48152;&#47140;</button>
+          <button type="button" class="claim-delete-btn" id="claim-delete">&#52397;&#44396;&#49325;&#51228;</button>
+          <button type="button" class="claim-merge-btn" id="claim-merge">&#49440;&#53469;&#52397;&#44396;&#49436;&#32;&#54633;&#52824;&#44592;</button>
+        </div>
+        <div class="claim-list" id="claim-list"></div>
+      </section>
+    </main>
+  </div>
+  <script src="data-sync.js"></script>
+  <script>
+    let cachedClaims = [];
+    let filteredClaims = [];
+    const claimYear = document.getElementById("claim-year");
+    const claimMonth = document.getElementById("claim-month");
+    const claimDriver = document.getElementById("claim-driver");
+    const claimApproveBtn = document.getElementById("claim-approve");
+    const claimRejectBtn = document.getElementById("claim-reject");
+    const claimDeleteBtn = document.getElementById("claim-delete");
+    const claimMergeBtn = document.getElementById("claim-merge");
+    const claimStatusKey = "dongteukMealClaimStatus";
+
+    
+
+    const openClaimWindow = (claim, title) => {
+      const files = claim && Array.isArray(claim.files) ? claim.files : [];
+      const win = window.open("", "_blank");
+      if (!win) {
+        alert("?앹뾽??李⑤떒?섏뿀?듬땲?? ?앹뾽 ?덉슜 ???ㅼ떆 ?쒕룄??二쇱꽭??");
+        return;
+      }
+      const imagesHtml = files
+        .map(
+          (file) => `
+            <div class="image-item">
+              <img src="${file.dataUrl}" alt="${file.name}">
+              <div class="image-name">${file.name}</div>
+            </div>
+          `
+        )
+        .join("");
+      win.document.write(`
+        <!DOCTYPE html>
+        <html lang="ko">
+        <head>
+          <meta charset="utf-8" />
+          <title>${title}</title>
+          <style>
+            body { margin: 0; font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; background: #f4f6f9; color: #0f223d; }
+            .wrap { padding: 24px; }
+            h1 { margin: 0 0 16px; font-size: 20px; }
+            .image-item { background: #fff; border: 1px solid rgba(15, 23, 42, 0.08); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
+            img { width: 100%; display: block; border-radius: 10px; border: 1px solid rgba(15, 23, 42, 0.08); }
+            .image-name { margin-top: 8px; font-size: 12px; color: rgba(14, 26, 43, 0.7); }
+          
+    /* Unified mobile sidebar menu */
+    @media (max-width: 720px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+        overflow-x: hidden;
+        padding: 6px;
+        flex-wrap: wrap;
+      }
+
+      .sidebar-footer {
+        display: none;
+      }
+
+      .logo {
+        width: 54px;
+        margin: 0;
+      }
+
+      .menu {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 2px;
+        margin-top: 2px;
+        width: 100%;
+        flex: 0 0 auto;
+        align-content: start;
+        grid-auto-rows: 18px;
+      }
+
+      .menu a {
+        white-space: normal;
+        font-size: 8px;
+        height: 18px;
+        line-height: 1;
+        padding: 0 1px;
+        border-radius: 8px;
+      }
+
+      .main {
+        padding: 6px 8px 12px;
+      }
+
+      .page-header,
+      .topbar {
+        flex-wrap: wrap;
+        gap: 8px;
+        height: auto;
+        min-height: 0;
+        padding: 6px 12px;
+      }
+
+      .page-header {
+        margin-bottom: 8px;
+      }
+
+      .controls {
+        margin-bottom: 8px;
+      }
+    }
+      /* role-menu-guard */
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/register-info"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/dispatch-create"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/office-work"] {
+      display: none !important;
+    }
+      /* logo-layout-lock */
+    .logo {
+      width: 100px;
+      height: 24px;
+      object-fit: contain;
+      display: block;
+      flex-shrink: 0;
+    }
+    @media (max-width: 720px) {
+      .logo {
+        width: 88px;
+        height: 22px;
+      }
+    }
+  </style>
+          <script>
+    // admin-class-boot
+    (() => {
+      const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      if (role === "admin" || role === "관리자") {
+        document.documentElement.classList.add("is-admin");
+        document.addEventListener("DOMContentLoaded", () => {
+          document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin");
+        });
+      }
+    })();
+  </script>
+</head>
+        <body>
+          <div class="wrap">
+            <h1>${title}</h1>
+            ${imagesHtml || "<div>등록된 이미지가 없습니다.</div>"}
+          </div>
+        </body>
+        </html>
+      `);
+      win.document.close();
+    const loadImage = (src) =>
+      new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
+
+    const getClaimSortKey = (claim) => {
+      const dates = Array.isArray(claim.dates) ? claim.dates.slice().sort() : [];
+      return dates.length ? dates[0] : String(claim.createdAt || "");
+    };
+
+    const mergeSelectedClaims = async () => {
+      const checkedCards = Array.from(document.querySelectorAll(".claim-check:checked"))
+        .map((input) => input.closest(".claim-card"))
+        .filter(Boolean);
+      const targets = checkedCards.length
+        ? checkedCards
+            .map((card) => Number(card.getAttribute("data-index") || "0"))
+            .map((index) => filteredClaims[index])
+            .filter(Boolean)
+        : [];
+      if (!targets.length) {
+        alert("\uD569\uCE60 \uCCAD\uAD6C\uC11C\uB97C \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.");
+        return;
+      }
+
+      const orderedClaims = targets
+        .slice()
+        .sort((a, b) => String(getClaimSortKey(a)).localeCompare(String(getClaimSortKey(b))));
+      const sources = orderedClaims
+        .flatMap((claim) => (Array.isArray(claim.files) ? claim.files : []))
+        .map((file) => file.dataUrl)
+        .filter(Boolean);
+      if (!sources.length) {
+        alert("\uD569\uCE60 \uC774\uBBF8\uC9C0\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.");
+        return;
+      }
+
+      let images = [];
+      try {
+        images = await Promise.all(sources.map((src) => loadImage(src)));
+      } catch (error) {
+        alert("\uC774\uBBF8\uC9C0\uB97C \uBD88\uB7EC\uC624\uB294 \uC911 \uBB38\uC81C\uAC00 \uBC1C\uC0DD\uD588\uC2B5\uB2C8\uB2E4.");
+        return;
+      }
+
+      const margin = 40;
+      const gap = 20;
+      const baseWidth = images[0].width || 2480;
+      const scaledHeights = images.map((img) => Math.round((img.height * baseWidth) / img.width));
+      const totalHeight =
+        scaledHeights.reduce((sum, height) => sum + height, 0) + gap * (images.length - 1) + margin * 2;
+      const canvas = document.createElement("canvas");
+      canvas.width = baseWidth + margin * 2;
+      canvas.height = totalHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      let y = margin;
+      images.forEach((img, index) => {
+        const drawHeight = scaledHeights[index];
+        ctx.drawImage(img, margin, y, baseWidth, drawHeight);
+        y += drawHeight + gap;
+      });
+      const now = new Date();
+      const stamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(
+        now.getDate()
+      ).padStart(2, "0")}`;
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/jpeg", 0.92);
+      link.download = `\uCCAD\uAD6C\uC11C-\uD569\uCE68-${stamp}.jpg`;
+      link.click();
+    };
+    };
+
+    const renderClaimTabs = () => {
+      const listEl = document.getElementById("claim-list");
+      if (!listEl) return;
+      if (!filteredClaims.length) {
+        listEl.innerHTML = "";
+        return;
+      }
+      let statusMap = {};
+      try {
+        statusMap = JSON.parse(localStorage.getItem(claimStatusKey) || "{}");
+      } catch (error) {
+        statusMap = {};
+      }
+      listEl.innerHTML = filteredClaims
+        .map((claim, index) => {
+          const period = claim.period || "-";
+          const name = claim.name || "-";
+          const count = Array.isArray(claim.dates) ? claim.dates.length : 0;
+          const userKey = resolveClaimUser(claim);
+          const dateStatuses = userKey ? statusMap[userKey] || {} : {};
+          const dates = Array.isArray(claim.dates) ? claim.dates : [];
+          const resolvedStatus = dates.some((date) => dateStatuses[date] === "approved")
+            ? "approved"
+            : dates.some((date) => dateStatuses[date] === "rejected")
+              ? "rejected"
+              : "pending";
+          const statusLabel =
+            resolvedStatus === "approved"
+              ? "\uCCAD\uAD6C\uC2B9\uC778"
+              : resolvedStatus === "rejected"
+                ? "\uCCAD\uAD6C\uBC18\uB824"
+                : "\uCCAD\uAD6C\uB300\uAE30";
+          const created = claim.createdAt ? new Date(claim.createdAt) : null;
+          const createdText = created
+            ? `${created.getFullYear()}-${String(created.getMonth() + 1).padStart(2, "0")}-${String(
+                created.getDate()
+              ).padStart(2, "0")} ${String(created.getHours()).padStart(2, "0")}:${String(
+                created.getMinutes()
+              ).padStart(2, "0")}`
+            : "-";
+          return `
+            <div class="claim-card" data-index="${index}">
+              <input class="claim-check" type="checkbox" aria-label="\uCCAD\uAD6C\uC11C \uC120\uD0DD">
+              <div class="claim-card-title">\uCCAD\uAD6C\uC11C${index + 1}</div>
+              <div class="claim-status ${resolvedStatus}">${statusLabel}</div>
+              <div class="claim-card-meta">\uC774\uB984: ${name}</div>
+              <div class="claim-card-meta">\uCCAD\uAD6C\uAE30\uAC04: ${period}</div>
+              <div class="claim-card-meta">\uC120\uD0DD\uC77C\uC790: ${count}</div>
+              <div class="claim-card-meta">\uC0DD\uC131\uC77C\uC2DC: ${createdText}</div>
+              <button type="button" class="claim-view" data-index="${index}">\uCCAD\uAD6C\uC11C \uBCF4\uAE30</button>
+            </div>
+          `;
+        })
+        .join("");
+    };
+
+    const loadClaims = () => {
+      try {
+        cachedClaims = JSON.parse(localStorage.getItem("dongteukMealClaimImages") || "[]");
+      } catch (error) {
+        cachedClaims = [];
+      }
+      cachedClaims = cachedClaims
+        .slice()
+        .sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+      applyFilters();
+    };
+
+    const matchMonth = (claim, year, month) => {
+      if (!year || !month) return true;
+      const target = `${year}-${String(month).padStart(2, "0")}`;
+      const dates = Array.isArray(claim.dates) ? claim.dates : [];
+      return dates.some((date) => String(date).startsWith(target));
+    };
+
+        const applyFilters = () => {
+      const year = claimYear?.value || "";
+      const month = claimMonth?.value || "";
+      const driver = (claimDriver?.value || "").trim();
+      filteredClaims = cachedClaims.filter((claim) => {
+        const name = (claim.name || "").trim();
+        const normalizedName = name.split(" ")[0];
+        const monthMatch = matchMonth(claim, year, month);
+        const driverMatch =
+          !driver ||
+          name === driver ||
+          normalizedName === driver ||
+          name.includes(driver) ||
+          (claim.user || "") === driver;
+        return monthMatch && driverMatch;
+      });
+      renderClaimTabs();
+    };
+
+    const resolveClaimUser = (claim) => {
+      const rawName = (claim.name || "").trim();
+      if (claim.user) return claim.user;
+      return rawName ? rawName.split(" ")[0] : "";
+    };
+
+    const updateClaimStatus = (status) => {
+      const checkedCards = Array.from(document.querySelectorAll(".claim-check:checked"))
+        .map((input) => input.closest(".claim-card"))
+        .filter(Boolean);
+      const targets = checkedCards.length
+        ? checkedCards
+            .map((card) => Number(card.getAttribute("data-index") || "0"))
+            .map((index) => filteredClaims[index])
+            .filter(Boolean)
+        : [];
+      if (!targets.length) {
+        const activeCard = document.querySelector(".claim-card.active");
+        if (!activeCard) {
+          alert("처리할 청구서를 선택해 주세요.");
+          return;
+        }
+        const index = Number(activeCard.getAttribute("data-index") || "0");
+        const target = filteredClaims[index];
+        if (target) targets.push(target);
+      }
+      if (!targets.length) return;
+      const confirmed = confirm(
+        status === "approved" ? "선택한 청구서를 승인하시겠습니까?" : "선택한 청구서를 반려하시겠습니까?"
+      );
+      if (!confirmed) return;
+      let statusMap = {};
+      try {
+        statusMap = JSON.parse(localStorage.getItem(claimStatusKey) || "{}");
+      } catch (error) {
+        statusMap = {};
+      }
+      targets.forEach((claim) => {
+        const userKey = resolveClaimUser(claim);
+        if (!userKey) return;
+        const dates = Array.isArray(claim.dates) ? claim.dates : [];
+        if (!statusMap[userKey]) statusMap[userKey] = {};
+        dates.forEach((date) => {
+          if (date) statusMap[userKey][date] = status;
+        });
+      });
+      localStorage.setItem(claimStatusKey, JSON.stringify(statusMap));
+      renderClaimTabs();
+      alert(status === "approved" ? "청구 승인 처리되었습니다." : "청구 반려 처리되었습니다.");
+    };
+
+    const fillClaimYearMonth = () => {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth() + 1;
+      if (claimYear) {
+        for (let y = currentYear - 2; y <= currentYear + 2; y += 1) {
+          const option = document.createElement("option");
+          option.value = String(y);
+          option.textContent = `${y}\uB144`;
+          if (y === currentYear) option.selected = true;
+          claimYear.appendChild(option);
+        }
+      }
+      if (claimMonth) {
+        for (let m = 1; m <= 12; m += 1) {
+          const option = document.createElement("option");
+          option.value = String(m).padStart(2, "0");
+          option.textContent = `${m}\uC6D4`;
+          if (m === currentMonth) option.selected = true;
+          claimMonth.appendChild(option);
+        }
+      }
+    };
+
+    const fillDriverOptions = () => {
+      if (!claimDriver) return;
+      let drivers = [];
+      try {
+        drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+      } catch (error) {
+        drivers = [];
+      }
+      const names = drivers
+        .map((driver) => (driver.name || "").trim())
+        .filter(Boolean);
+      const unique = Array.from(new Set(names));
+      claimDriver.innerHTML =
+        '<option value="">&#51204;&#52404;</option>' +
+        unique.map((name) => `<option value="${name}">${name}</option>`).join("");
+    };
+
+    const renderLoginMeta = () => {
+      const userEl = document.getElementById("login-user");
+      const timeEl = document.getElementById("login-time");
+      if (!userEl || !timeEl) return;
+
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+      let displayName = currentUser || "-";
+      let displayTitle = "";
+      try {
+        const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+        const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+        if (found) {
+          displayName = found.name || displayName;
+          displayTitle = found.title || "";
+        }
+      } catch (error) {
+      }
+      const titleText = displayTitle ? ` ${displayTitle}` : "";
+      userEl.textContent = `${displayName}${titleText}`;
+
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const hh = String(now.getHours()).padStart(2, "0");
+      const min = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      timeEl.textContent = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+    };
+
+    const claimListEl = document.getElementById("claim-list");
+    if (claimListEl) {
+      claimListEl.addEventListener("click", (event) => {
+        const card = event.target.closest(".claim-card");
+        if (!card) return;
+        if (event.target.classList.contains("claim-check")) {
+          return;
+        }
+        const index = Number(card.getAttribute("data-index") || "0");
+        if (event.target.classList.contains("claim-view")) {
+          openClaimWindow(filteredClaims[index], `\uCCAD\uAD6C\uC11C${index + 1}`);
+          return;
+        }
+        const cards = claimListEl.querySelectorAll(".claim-card");
+        cards.forEach((item) => item.classList.remove("active"));
+        card.classList.add("active");
+      });
+    }
+
+    if (claimDeleteBtn) {
+      claimDeleteBtn.addEventListener("click", () => {
+        const checkedCards = Array.from(document.querySelectorAll(".claim-check:checked"))
+          .map((input) => input.closest(".claim-card"))
+          .filter(Boolean);
+        const targets = checkedCards.length
+          ? checkedCards
+              .map((card) => Number(card.getAttribute("data-index") || "0"))
+              .map((index) => filteredClaims[index])
+              .filter(Boolean)
+          : [];
+        if (!targets.length) {
+          const activeCard = document.querySelector(".claim-card.active");
+          if (!activeCard) {
+            alert("삭제할 청구서를 선택해 주세요.");
+            return;
+          }
+          const index = Number(activeCard.getAttribute("data-index") || "0");
+          const target = filteredClaims[index];
+          if (target) targets.push(target);
+        }
+        if (!targets.length) return;
+        if (!confirm("선택한 청구서를 삭제하시겠습니까?")) return;
+        const remaining = cachedClaims.filter((item) => !targets.includes(item));
+        cachedClaims = remaining;
+        localStorage.setItem("dongteukMealClaimImages", JSON.stringify(remaining));
+        if (!remaining.length) {
+          localStorage.removeItem("dongteukMealClaimSummary");
+        }
+        applyFilters();
+      });
+    }
+    if (claimMergeBtn) {
+      claimMergeBtn.addEventListener("click", () => {
+        mergeSelectedClaims();
+      });
+    }
+    if (claimApproveBtn) {
+      claimApproveBtn.addEventListener("click", () => {
+        updateClaimStatus("approved");
+      });
+    }
+    if (claimRejectBtn) {
+      claimRejectBtn.addEventListener("click", () => {
+        updateClaimStatus("rejected");
+      });
+    }
+
+    loadClaims();
+    fillClaimYearMonth();
+    fillDriverOptions();
+    if (claimYear) claimYear.addEventListener("change", applyFilters);
+    if (claimMonth) claimMonth.addEventListener("change", applyFilters);
+    if (claimDriver) claimDriver.addEventListener("change", applyFilters);
+    window.addEventListener("storage", (event) => {
+      if (event.key === "dongteukMealClaimImages") {
+        loadClaims();
+      }
+    });
+    renderLoginMeta();
+    setInterval(renderLoginMeta, 1000);
+  </script>
+  <script>
+    // office-menu-guard
+    (() => {
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+            const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      let isAdmin = role === "admin" || role === "관리자";
+      if (currentUser) {
+        try {
+          const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+          const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+          isAdmin = Boolean(found && found.status === "관리자");
+        } catch (error) {
+          isAdmin = false;
+        }
+      }
+      if (isAdmin) { document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin"); return; }
+      const targets = document.querySelectorAll('a[href="/office-work"]');
+      targets.forEach((el) => {
+        el.style.display = "none";
+        el.setAttribute("aria-hidden", "true");
+        el.tabIndex = -1;
+      });
+    })();
+  </script>
 </body>
 </html>
-
 
 
 

@@ -101,24 +101,15 @@ app.use((req, res, next) => {
   res.set("Pragma", "no-cache");
   res.set("Expires", "0");
   if (adminOnlyPages.has(resolvedPath) && req.session.user.role !== "admin") {
-    return res.redirect("/second?denied=1");
+    return res.redirect("/second");
   }
   return next();
 });
 
-app.use(
-  express.static(path.join(__dirname), {
-    setHeaders: (res, filePath) => {
-      if (path.extname(filePath).toLowerCase() === ".html") {
-        res.setHeader("Content-Type", "text/html; charset=utf-8");
-      }
-    }
-  })
-);
+app.use(express.static(path.join(__dirname)));
 
 Object.entries(cleanRoutes).forEach(([clean, html]) => {
   app.get(clean, (req, res) => {
-    res.set("Content-Type", "text/html; charset=utf-8");
     res.sendFile(path.join(__dirname, html));
   });
 });

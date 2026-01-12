@@ -851,7 +851,16 @@
         margin-bottom: 8px !important;
       }
     }
-    /* logo-layout-lock */
+    /* role-menu-guard */
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/register-info"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/dispatch-create"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/office-work"] {
+      display: none !important;
+    }
+      /* logo-layout-lock */
     .logo {
       width: 100px;
       height: 24px;
@@ -866,10 +875,896 @@
       }
     }
   </style>
-  
+  <script>
+    // admin-class-boot
+    (() => {
+      const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      if (role === "admin" || role === "관리자") {
+        document.documentElement.classList.add("is-admin");
+        document.addEventListener("DOMContentLoaded", () => {
+          document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin");
+        });
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="/second"><img class="logo" width="100" height="24" src="Dongteuk.png" alt="(주)동특 로고" /></a>
+      <nav class="menu" aria-label="주요 메뉴">
+        <a href="/second">&#50629;&#47924;&#54788;&#54889;</a>
+        <a href="/notice">공지사항</a>
+        <a href="/dispatch">배차현황</a>
+        <a class="active" href="/report">기사업무</a>
+        <a href="/office-work">&#49324;&#47924;&#50629;&#47924;</a>
+        <a href="/register-info">등록정보</a>
+        <a href="/settings">설정</a>
+            
+      </nav>
+<div class="sidebar-footer">
+        <div class="login-meta">
+          <span id="login-user">-</span>
+          <span id="login-time">-</span>
+        </div>
+      </div></aside>
+
+    <main class="main">
+      <header class="page-header">
+        <h1>기사업무</h1>
+          <div class="header-actions">
+      <button class="logout-btn" type="button" id="paystub-btn" onclick="location.href='/paystub'">월급명세서</button>
+      <button class="logout-btn" type="button" id="meal-claim-btn" onclick="location.href='/meal-claim'">식대청구</button>
+      <button class="logout-btn" type="button" id="extra-claim-btn" onclick="location.href='/extra-claim'">기타비용청구</button>
+      <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">로그아웃</button>
+    </div></header>
+
+      <section class="card work-card">
+        <div class="work-card-inner">
+          <div class="work-header">
+            <h2 class="work-title">기사업무 입력</h2>
+            <div class="work-subtitle">오늘 업무를 기록하세요</div>
+          </div>
+          <div class="work-form">
+            <div class="work-field narrow field-date">
+              <label for="work-date">날짜</label>
+              <div class="date-input-wrap">
+                <input class="work-date-display" id="work-date-display" type="text" readonly />
+                <input class="work-date-input" id="work-date" type="date" />
+              </div>
+            </div>
+            <div class="work-field narrow field-distance">
+              <label for="work-distance">주행거리</label>
+              <div class="unit-input">
+                <input id="work-distance" type="text" inputmode="numeric" />
+                <span class="unit-suffix">km</span>
+              </div>
+            </div>
+            <div class="work-field narrow field-delivery">
+              <label for="work-delivery">납품량</label>
+              <div class="unit-input">
+                <input id="work-delivery" type="text" inputmode="numeric" />
+                <span class="unit-suffix">kg</span>
+              </div>
+            </div>
+            <div class="work-field field-meal">
+              <label>식대</label>
+              <div class="meal-grid" aria-label="식대 구분">
+                <div class="unit-input">
+                  <input id="work-meal-breakfast" type="text" inputmode="numeric" placeholder="조식" />
+                  <span class="unit-suffix">원</span>
+                </div>
+                <div class="unit-input">
+                  <input id="work-meal-lunch" type="text" inputmode="numeric" placeholder="중식" />
+                  <span class="unit-suffix">원</span>
+                </div>
+                <div class="unit-input">
+                  <input id="work-meal-dinner" type="text" inputmode="numeric" placeholder="석식" />
+                  <span class="unit-suffix">원</span>
+                </div>
+              </div>
+              <div class="meal-upload" aria-label="영수증 등록">
+                <button class="meal-upload-btn" type="button" data-meal="breakfast">조식 영수증</button>
+                <button class="meal-upload-btn" type="button" data-meal="lunch">중식 영수증</button>
+                <button class="meal-upload-btn" type="button" data-meal="dinner">석식 영수증</button>
+                <input id="meal-upload-input" type="file" accept="image/*" hidden />
+              </div>
+            </div>
+            <div class="work-field narrow field-extra">
+              <label for="work-extra">기타비용</label>
+              <div class="unit-input">
+                <input id="work-extra" type="text" inputmode="numeric" />
+                <span class="unit-suffix">원</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-actions">
+            <button  type="button" id="work-reset">초기화</button>
+            <button  type="button" id="work-save">저장</button>
+          </div>
+          <div class="meta work-result" id="work-result"></div>
+        </div>
+      </section>
+      <section class="work-history-wrap">
+        <section class="card work-history">
+          <div class="work-header">
+            <h2 class="work-title">기사실적</h2>
+            <div class="work-subtitle">등록된 내역을 확인하세요</div>
+            <div class="period-picker" aria-label="연월 선택">
+              <select id="work-year">
+                <option value="">년</option>
+              </select>
+              <select id="work-month">
+                <option value="">월</option>
+              </select>
+            </div>
+          </div>
+          <div class="score-grid" aria-label="점수 요약">
+            <div class="score-card">
+              <div class="score-label">주행점수</div>
+              <div class="score-value" id="score-distance">0</div>
+            </div>
+            <div class="score-card">
+              <div class="score-label">납품점수</div>
+              <div class="score-value" id="score-delivery">0</div>
+            </div>
+            <div class="score-card">
+              <div class="score-label">총점수</div>
+              <div class="score-value" id="score-total">0</div>
+            </div>
+          </div>
+          <table class="work-table">
+            <thead>
+            <tr>
+              <th style="width: 120px;">날짜</th>
+              <th style="width: 90px;">주행거리</th>
+              <th style="width: 90px;">납품량</th>
+              <th style="width: 70px;">수정</th>
+            </tr>
+          </thead>
+          <tbody id="work-list"></tbody>
+        </table>
+        <div class="meta" id="work-range"></div>
+        </section>
+        <section class="card work-history">
+          <div class="work-header">
+            <h2 class="work-title">비용조회</h2>
+            <div class="work-subtitle">월별 합계를 확인하세요</div>
+            <div class="period-picker" aria-label="연월 선택">
+              <select id="cost-year">
+                <option value="">년</option>
+              </select>
+              <select id="cost-month">
+                <option value="">월</option>
+              </select>
+            </div>
+          </div>
+          <table class="work-table">
+            <thead>
+              <tr>
+                <th style="width: 120px;">날짜</th>
+                <th style="width: 90px;">식대</th>
+                <th style="width: 90px;">기타비용</th>
+                <th style="width: 70px;">수정</th>
+              </tr>
+            </thead>
+            <tbody id="cost-list"></tbody>
+          </table>
+          <div class="meta" id="cost-range"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+  <script src="data-sync.js"></script>
+  <script>
+    const byId = (id) => document.getElementById(id);
+    const workDate = byId("work-date");
+    const workDistance = byId("work-distance");
+    const workDelivery = byId("work-delivery");
+    const workMealBreakfast = byId("work-meal-breakfast");
+    const workMealLunch = byId("work-meal-lunch");
+    const workMealDinner = byId("work-meal-dinner");
+    const workExtra = byId("work-extra");
+    const workResult = byId("work-result");
+    const workDateDisplay = byId("work-date-display");
+    const mealUploadInput = byId("meal-upload-input");
+    const workYear = byId("work-year");
+    const workMonth = byId("work-month");
+    const workRange = byId("work-range");
+    const scoreDistance = byId("score-distance");
+    const scoreDelivery = byId("score-delivery");
+    const scoreTotal = byId("score-total");
+    const costYear = byId("cost-year");
+    const costMonth = byId("cost-month");
+    const costList = byId("cost-list");
+    const costRange = byId("cost-range");
+    const workList = byId("work-list");
+    const resetBtn = byId("work-reset");
+    const saveBtn = byId("work-save");
+
+    const getCurrentUser = () => (localStorage.getItem("dongteukCurrentUser") || "").trim();
+    const claimRequestKey = "dongteukMealClaimRequests";
+    const claimStatusKey = "dongteukMealClaimStatus";
+
+    const storageKeyCandidates = ["dongteukWork", "dongteukWorkReports", "dongteukWorkData"];
+    const storageKey =
+      storageKeyCandidates.find((key) => localStorage.getItem(key)) || "dongteukWork";
+    const mealImageKey = "dongteukMealImages";
+    let editKey = null;
+    let costEditKey = null;
+
+        const updateWeekday = (value) => {
+      if (!workDateDisplay) return;
+      if (!value) {
+        workDateDisplay.value = "";
+        return;
+      }
+      const [year, month, day] = value.split("-").map(Number);
+      const date = new Date(year, month - 1, day);
+      const names = ["\uC77C", "\uC6D4", "\uD654", "\uC218", "\uBAA9", "\uAE08", "\uD1A0"];
+      const yyyy = String(year).padStart(4, "0");
+      const mm = String(month).padStart(2, "0");
+      const dd = String(day).padStart(2, "0");
+      workDateDisplay.value = `${yyyy}-${mm}-${dd}(${names[date.getDay()]})`;
+    };
+
+    const setTodayDate = () => {
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      if (workDate) workDate.value = `${yyyy}-${mm}-${dd}`;
+      if (workDateDisplay) workDateDisplay.value = `${yyyy}-${mm}-${dd}`;
+      updateWeekday(workDate?.value || "");
+    };
+
+    const readWork = () => {
+      try {
+        return JSON.parse(localStorage.getItem(storageKey) || "[]");
+      } catch (error) {
+        return [];
+      }
+    };
+
+    const readClaimRequests = () => {
+      try {
+        return JSON.parse(localStorage.getItem(claimRequestKey) || "{}");
+      } catch (error) {
+        return {};
+      }
+    };
+
+    const readClaimStatus = () => {
+      try {
+        return JSON.parse(localStorage.getItem(claimStatusKey) || "{}");
+      } catch (error) {
+        return {};
+      }
+    };
+
+    const readMealImages = () => {
+      try {
+        return JSON.parse(localStorage.getItem(mealImageKey) || "{}");
+      } catch (error) {
+        return {};
+      }
+    };
+
+    const toDateString = (date) => {
+      const yyyy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, "0");
+      const dd = String(date.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    };
+
+    const getPeriodRange = (year, month) => {
+      const y = Number(year);
+      const m = Number(month);
+      if (!y || !m) return null;
+      const start = new Date(y, m - 2, 21);
+      const end = new Date(y, m - 1, 20);
+      return { start: toDateString(start), end: toDateString(end) };
+    };
+
+    const getMonthRange = (year, month) => {
+      const y = Number(year);
+      const m = Number(month);
+      if (!y || !m) return null;
+      const start = new Date(y, m - 1, 1);
+      const end = new Date(y, m, 0);
+      return { start: toDateString(start), end: toDateString(end) };
+    };
+
+    const normalizeNumber = (value) => (value || "").replace(/\D/g, "");
+    const formatNumber = (value) => {
+      const digits = normalizeNumber(value);
+      if (!digits) return "";
+      return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    };
+
+    const formatWithUnit = (value, unit) => {
+      const formatted = formatNumber(value);
+      return formatted ? `${formatted} ${unit}` : "-";
+    };
+
+    const formatScore = (value) => {
+      if (!Number.isFinite(value)) return "0";
+      const rounded = Math.round(value * 10) / 10;
+      return rounded % 1 === 0 ? String(Math.round(rounded)) : rounded.toFixed(1);
+    };
+
+    const setEditMode = (isEditing) => {
+      if (workDateDisplay) workDateDisplay.disabled = isEditing;
+      if (workDate) workDate.disabled = isEditing;
+      if (workMealBreakfast) workMealBreakfast.disabled = isEditing;
+      if (workMealLunch) workMealLunch.disabled = isEditing;
+      if (workMealDinner) workMealDinner.disabled = isEditing;
+      if (workExtra) workExtra.disabled = isEditing;
+    };
+
+    const updateWorkValues = (date, user, distance, delivery) => {
+      const rows = readWork();
+      const updated = rows.map((row) => {
+        if (row.date === date && (row.user || "") === user) {
+          return {
+            ...row,
+            distance: normalizeNumber(distance),
+            delivery: normalizeNumber(delivery),
+          };
+        }
+        return row;
+      });
+      writeWork(updated);
+      renderWork();
+      renderCosts();
+    };
+
+    const updateCostValues = (date, user, meal, extra) => {
+      const rows = readWork();
+      const updated = rows.map((row) => {
+        if (row.date === date && (row.user || "") === user) {
+          return {
+            ...row,
+            mealTotal: normalizeNumber(meal),
+            extra: normalizeNumber(extra),
+          };
+        }
+        return row;
+      });
+      writeWork(updated);
+      renderWork();
+      renderCosts();
+    };
+
+    const writeWork = (rows) => {
+      localStorage.setItem(storageKey, JSON.stringify(rows));
+    };
+
+    const renderWork = () => {
+      if (!workList) return;
+      const rows = readWork();
+      const currentUser = getCurrentUser();
+      const selectedYear = workYear?.value || "";
+      const selectedMonth = workMonth?.value || "";
+      const period = selectedYear && selectedMonth ? getPeriodRange(selectedYear, selectedMonth) : null;
+      const filtered = rows.filter((row) => {
+        if (!currentUser || (row.user || "") !== currentUser) return false;
+        if (!row.date) return false;
+        if (!period) return true;
+        return row.date >= period.start && row.date <= period.end;
+      });
+      if (workRange) {
+        if (period) {
+          workRange.textContent = `${period.start} ~ ${period.end} 조회`;
+          workRange.style.display = "block";
+        } else {
+          workRange.textContent = "";
+          workRange.style.display = "none";
+        }
+      }
+      if (scoreDistance || scoreDelivery || scoreTotal) {
+        const totalDistance = filtered.reduce((sum, row) => sum + Number(row.distance || 0), 0);
+        const totalDelivery = filtered.reduce((sum, row) => sum + Number(row.delivery || 0), 0);
+        const drivingScore = (totalDistance / 4572) * 50;
+        const deliveryScore = (totalDelivery / 436167) * 50;
+        if (scoreDistance) scoreDistance.textContent = formatScore(drivingScore);
+        if (scoreDelivery) scoreDelivery.textContent = formatScore(deliveryScore);
+        if (scoreTotal) scoreTotal.textContent = formatScore(drivingScore + deliveryScore);
+      }
+      workList.innerHTML = filtered.length
+        ? filtered
+            .slice()
+            .reverse()
+            .map(
+              (row) => `
+              <tr>
+                <td>${row.date || "-"}</td>
+                <td>
+                  ${
+                    editKey && editKey.date === (row.date || "") && editKey.user === (row.user || "")
+                      ? `<input type="text" class="work-edit-input" data-field="distance" data-date="${row.date || ""}" data-user="${row.user || ""}" value="${formatNumber(row.distance)}" inputmode="numeric" />`
+                      : formatWithUnit(row.distance, "km")
+                  }
+                </td>
+                <td>
+                  ${
+                    editKey && editKey.date === (row.date || "") && editKey.user === (row.user || "")
+                      ? `<input type="text" class="work-edit-input" data-field="delivery" data-date="${row.date || ""}" data-user="${row.user || ""}" value="${formatNumber(row.delivery)}" inputmode="numeric" />`
+                      : formatWithUnit(row.delivery, "kg")
+                  }
+                </td>
+                <td><button type="button" class="work-edit" data-date="${row.date || ""}" data-user="${row.user || ""}">${editKey && editKey.date === (row.date || "") && editKey.user === (row.user || "") ? "저장" : "수정"}</button></td>
+              </tr>
+            `
+            )
+            .join("")
+        : "<tr><td colspan=\"4\">등록된 기사업무가 없습니다.</td></tr>";
+    };
+
+    const renderCosts = () => {
+      const rows = readWork();
+      const requestMap = readClaimRequests();
+      const statusMap = readClaimStatus();
+      const currentUser = getCurrentUser();
+      const requestedDates = new Set(requestMap[currentUser] || []);
+      const statusDates = statusMap[currentUser] || {};
+      const selectedYear = costYear?.value || "";
+      const selectedMonth = costMonth?.value || "";
+      const period = selectedYear && selectedMonth ? getMonthRange(selectedYear, selectedMonth) : null;
+      const filtered = rows.filter((row) => {
+        if (!currentUser || (row.user || "") !== currentUser) return false;
+        if (!row.date) return false;
+        const [y, m] = row.date.split("-");
+        if (selectedYear && y !== selectedYear) return false;
+        if (selectedMonth && m !== selectedMonth) return false;
+        return true;
+      });
+      if (costRange) {
+        if (period) {
+          costRange.textContent = `${period.start} ~ ${period.end} 조회`;
+          costRange.style.display = "block";
+        } else {
+          costRange.textContent = "";
+          costRange.style.display = "none";
+        }
+      }
+      if (!costList) return;
+      costList.innerHTML = filtered.length
+        ? filtered
+            .slice()
+            .reverse()
+            .map((row) => {
+              const totalMeal =
+                row.mealTotal ||
+                row.meal ||
+                String(
+                  Number(row.mealBreakfast || 0) +
+                    Number(row.mealLunch || 0) +
+                    Number(row.mealDinner || 0)
+                );
+              return `
+              <tr>
+                <td>${row.date || "-"}${
+                  row.date
+                    ? statusDates[row.date] === "approved"
+                      ? ' <span class="claim-tag approved">청구승인</span>'
+                      : statusDates[row.date] === "rejected"
+                        ? ' <span class="claim-tag rejected">청구반려</span>'
+                        : requestedDates.has(row.date)
+                          ? ' <span class="claim-tag">청구요청</span>'
+                          : ""
+                    : ""
+                }</td>
+                <td>
+                  ${
+                    costEditKey && costEditKey.date === (row.date || "") && costEditKey.user === (row.user || "")
+                      ? `<input type="text" class="work-edit-input" data-field="meal" data-date="${row.date || ""}" data-user="${row.user || ""}" value="${formatNumber(totalMeal)}" inputmode="numeric" />`
+                      : formatWithUnit(totalMeal, "원")
+                  }
+                </td>
+                <td>
+                  ${
+                    costEditKey && costEditKey.date === (row.date || "") && costEditKey.user === (row.user || "")
+                      ? `<input type="text" class="work-edit-input" data-field="extra" data-date="${row.date || ""}" data-user="${row.user || ""}" value="${formatNumber(row.extra)}" inputmode="numeric" />`
+                      : formatWithUnit(row.extra, "원")
+                  }
+                </td>
+                <td><button type="button" class="work-edit" data-mode="cost" data-date="${row.date || ""}" data-user="${row.user || ""}">${costEditKey && costEditKey.date === (row.date || "") && costEditKey.user === (row.user || "") ? "저장" : "수정"}</button></td>
+              </tr>
+            `;
+            })
+            .join("")
+        : "<tr><td colspan=\"4\">등록된 비용이 없습니다.</td></tr>";
+    };
+
+    const setResult = (message, type) => {
+      if (!workResult) return;
+      workResult.textContent = message;
+      workResult.classList.remove("success", "error");
+      if (type) workResult.classList.add(type);
+    };
+
+    const attachFormatter = (input) => {
+      if (!input) return;
+      input.addEventListener("input", () => {
+        const formatted = formatNumber(input.value);
+        input.value = formatted;
+      });
+    };
+
+    attachFormatter(workDistance);
+    attachFormatter(workDelivery);
+    attachFormatter(workMealBreakfast);
+    attachFormatter(workMealLunch);
+    attachFormatter(workMealDinner);
+    attachFormatter(workExtra);
+
+    if (mealUploadInput) {
+      const mealButtons = document.querySelectorAll(".meal-upload-btn");
+      mealButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const mealType = button.getAttribute("data-meal");
+          if (mealUploadInput) {
+            mealUploadInput.dataset.meal = mealType || "";
+            mealUploadInput.click();
+          }
+        });
+      });
+
+      mealUploadInput.addEventListener("change", () => {
+        const file = mealUploadInput.files && mealUploadInput.files[0];
+        const mealType = mealUploadInput.dataset.meal || "";
+        const user = getCurrentUser();
+        const dateValue = workDate?.value || "";
+        if (!file || !mealType) return;
+        if (!user) {
+          setResult("로그인 후 영수증을 등록할 수 있습니다.", "error");
+          mealUploadInput.value = "";
+          return;
+        }
+        if (!dateValue) {
+          setResult("날짜를 선택한 뒤 영수증을 등록하세요.", "error");
+          mealUploadInput.value = "";
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+          const data = readMealImages();
+          const key = `${user}|${dateValue}`;
+          const entry = data[key] || {};
+          entry[mealType] = reader.result;
+          data[key] = entry;
+          localStorage.setItem(mealImageKey, JSON.stringify(data));
+          setResult("영수증이 등록되었습니다.", "success");
+          mealUploadInput.value = "";
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener("click", () => {
+        if (workDistance) workDistance.value = "";
+        if (workDelivery) workDelivery.value = "";
+        if (workMealBreakfast) workMealBreakfast.value = "";
+        if (workMealLunch) workMealLunch.value = "";
+        if (workMealDinner) workMealDinner.value = "";
+        if (workExtra) workExtra.value = "";
+        editKey = null;
+        setEditMode(false);
+        setTodayDate();
+        setResult("", "");
+      });
+    }
+
+    if (workDateDisplay && workDate) {
+      workDateDisplay.addEventListener("click", () => {
+        if (typeof workDate.showPicker === "function") {
+          workDate.showPicker();
+        } else {
+          workDate.focus();
+          workDate.click();
+        }
+      });
+    }
+
+    if (workDate) {
+      workDate.addEventListener("change", () => {
+        updateWeekday(workDate.value);
+        });
+    }
+
+    const fillYearMonth = () => {
+      const currentYear = new Date().getFullYear();
+      const currentMonth = new Date().getMonth() + 1;
+      if (workYear) {
+        for (let y = currentYear - 2; y <= currentYear + 2; y += 1) {
+          const option = document.createElement("option");
+          option.value = String(y);
+          option.textContent = `${y}\uB144`;
+          if (y === currentYear) option.selected = true;
+          workYear.appendChild(option);
+        }
+      }
+      if (workMonth) {
+        for (let m = 1; m <= 12; m += 1) {
+          const option = document.createElement("option");
+          option.value = String(m).padStart(2, "0");
+          option.textContent = `${m}\uC6D4`;
+          if (m === currentMonth) option.selected = true;
+          workMonth.appendChild(option);
+        }
+      }
+      if (costYear) {
+        costYear.innerHTML = workYear ? workYear.innerHTML : costYear.innerHTML;
+      }
+      if (costMonth) {
+        costMonth.innerHTML = workMonth ? workMonth.innerHTML : costMonth.innerHTML;
+      }
+      if (costYear && workYear) {
+        costYear.value = workYear.value;
+      }
+      if (costMonth && workMonth) {
+        costMonth.value = workMonth.value;
+      }
+      if (costYear && !costYear.value) {
+        costYear.value = String(currentYear);
+      }
+      if (costMonth && !costMonth.value) {
+        costMonth.value = String(currentMonth).padStart(2, "0");
+      }
+    };
+
+    if (workYear) {
+      workYear.addEventListener("change", renderWork);
+    }
+    if (workMonth) {
+      workMonth.addEventListener("change", renderWork);
+    }
+    if (costYear) {
+      costYear.addEventListener("change", renderCosts);
+    }
+    if (costMonth) {
+      costMonth.addEventListener("change", renderCosts);
+    }
+
+    if (saveBtn) {
+      saveBtn.addEventListener("click", () => {
+        const mealBreakfastValue = normalizeNumber(workMealBreakfast?.value || "");
+        const mealLunchValue = normalizeNumber(workMealLunch?.value || "");
+        const mealDinnerValue = normalizeNumber(workMealDinner?.value || "");
+        const mealTotalValue = String(
+          Number(mealBreakfastValue || 0) + Number(mealLunchValue || 0) + Number(mealDinnerValue || 0)
+        );
+        const payload = {
+          date: workDate?.value || "",
+          distance: normalizeNumber(workDistance?.value || ""),
+          delivery: normalizeNumber(workDelivery?.value || ""),
+          mealBreakfast: mealBreakfastValue,
+          mealLunch: mealLunchValue,
+          mealDinner: mealDinnerValue,
+          mealTotal: mealTotalValue,
+          extra: normalizeNumber(workExtra?.value || ""),
+          user: getCurrentUser() || "",
+        };
+        if (!payload.date) {
+          setResult("날짜를 입력해 주세요.", "error");
+          return;
+        }
+        let rows = readWork();
+        if (editKey) {
+          rows = rows.filter(
+            (row) => !(row.date === editKey.date && (row.user || "") === editKey.user)
+          );
+        }
+        rows = rows.filter((row) => !(row.date === payload.date && (row.user || "") === payload.user));
+        rows.push(payload);
+        writeWork(rows);
+        renderWork();
+        renderCosts();
+        setResult(editKey ? "기사업무가 수정되었습니다." : "기사업무가 저장되었습니다.", "success");
+        editKey = null;
+        setEditMode(false);
+        setTodayDate();
+      });
+    }
+
+    if (workList) {
+      workList.addEventListener("click", (event) => {
+        const button = event.target.closest(".work-edit");
+        if (!button) return;
+        const date = button.getAttribute("data-date") || "";
+        const user = button.getAttribute("data-user") || "";
+        if (editKey && editKey.date === date && editKey.user === user) {
+          const distanceInput = workList.querySelector(
+            `.work-edit-input[data-field="distance"][data-date="${date}"][data-user="${user}"]`
+          );
+          const deliveryInput = workList.querySelector(
+            `.work-edit-input[data-field="delivery"][data-date="${date}"][data-user="${user}"]`
+          );
+          if (distanceInput || deliveryInput) {
+            editKey = null;
+            updateWorkValues(
+              date,
+              user,
+              distanceInput ? distanceInput.value : "",
+              deliveryInput ? deliveryInput.value : ""
+            );
+            setResult("납품실적이 수정되었습니다.", "success");
+          }
+          setEditMode(false);
+          return;
+        }
+        const rows = readWork();
+        const found = rows.find((row) => row.date === date && (row.user || "") === user);
+        if (!found) return;
+        editKey = { date: found.date || "", user: found.user || "" };
+        renderWork();
+        setEditMode(true);
+        setResult("납품실적을 수정 후 저장하세요.", "");
+        const input = workList.querySelector(
+          `.work-edit-input[data-field="distance"][data-date="${date}"][data-user="${user}"]`
+        );
+        if (input) input.focus();
+      });
+
+      workList.addEventListener("keydown", (event) => {
+        const input = event.target.closest(".work-edit-input");
+        if (!input) return;
+        if (event.key === "Enter") {
+          event.preventDefault();
+          const date = input.getAttribute("data-date") || "";
+          const user = input.getAttribute("data-user") || "";
+          const distanceInput = workList.querySelector(
+            `.work-edit-input[data-field="distance"][data-date="${date}"][data-user="${user}"]`
+          );
+          const deliveryInput = workList.querySelector(
+            `.work-edit-input[data-field="delivery"][data-date="${date}"][data-user="${user}"]`
+          );
+          editKey = null;
+          updateWorkValues(
+            date,
+            user,
+            distanceInput ? distanceInput.value : "",
+            deliveryInput ? deliveryInput.value : ""
+          );
+          setEditMode(false);
+          setResult("납품실적이 수정되었습니다.", "success");
+        }
+      });
+    }
+
+    if (costList) {
+      costList.addEventListener("click", (event) => {
+        const button = event.target.closest(".work-edit");
+        if (!button) return;
+        const date = button.getAttribute("data-date") || "";
+        const user = button.getAttribute("data-user") || "";
+        if (costEditKey && costEditKey.date === date && costEditKey.user === user) {
+          const mealInput = costList.querySelector(
+            `.work-edit-input[data-field="meal"][data-date="${date}"][data-user="${user}"]`
+          );
+          const extraInput = costList.querySelector(
+            `.work-edit-input[data-field="extra"][data-date="${date}"][data-user="${user}"]`
+          );
+          if (mealInput || extraInput) {
+            costEditKey = null;
+            updateCostValues(
+              date,
+              user,
+              mealInput ? mealInput.value : "",
+              extraInput ? extraInput.value : ""
+            );
+            setResult("비용조회가 수정되었습니다.", "success");
+          }
+          return;
+        }
+        const rows = readWork();
+        const found = rows.find((row) => row.date === date && (row.user || "") === user);
+        if (!found) return;
+        costEditKey = { date: found.date || "", user: found.user || "" };
+        renderCosts();
+        setResult("비용을 수정 후 저장하세요.", "");
+        const input = costList.querySelector(
+          `.work-edit-input[data-field="meal"][data-date="${date}"][data-user="${user}"]`
+        );
+        if (input) input.focus();
+      });
+
+      costList.addEventListener("keydown", (event) => {
+        const input = event.target.closest(".work-edit-input");
+        if (!input) return;
+        if (event.key === "Enter") {
+          event.preventDefault();
+          const date = input.getAttribute("data-date") || "";
+          const user = input.getAttribute("data-user") || "";
+          const mealInput = costList.querySelector(
+            `.work-edit-input[data-field="meal"][data-date="${date}"][data-user="${user}"]`
+          );
+          const extraInput = costList.querySelector(
+            `.work-edit-input[data-field="extra"][data-date="${date}"][data-user="${user}"]`
+          );
+          costEditKey = null;
+          updateCostValues(
+            date,
+            user,
+            mealInput ? mealInput.value : "",
+            extraInput ? extraInput.value : ""
+          );
+          setResult("비용조회가 수정되었습니다.", "success");
+        }
+      });
+    }
+
+    fillYearMonth();
+    setTodayDate();
+    renderWork();
+    renderCosts();
+  </script>
+  <script>
+    const renderLoginMeta = () => {
+      const userEl = document.getElementById("login-user");
+      const timeEl = document.getElementById("login-time");
+      if (!userEl || !timeEl) return;
+
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+      let displayName = currentUser || "-";
+      let displayTitle = "";
+      try {
+        const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+        const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+        if (found) {
+          displayName = found.name || displayName;
+          displayTitle = found.title || "";
+        }
+      } catch (error) {
+      }
+      const titleText = displayTitle ? ` ${displayTitle}` : "";
+      userEl.textContent = `${displayName}${titleText}`;
+
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mi = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      timeEl.textContent = `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
+    };
+
+    renderLoginMeta();
+    setInterval(renderLoginMeta, 1000);
+  </script>
+  <script>
+    // admin-menu-guard
+    (() => {
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+            const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      let isAdmin = role === "admin" || role === "관리자";
+      if (currentUser) {
+        try {
+          const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+          const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+          isAdmin = Boolean(found && found.status === "관리자");
+        } catch (error) {
+          isAdmin = false;
+        }
+      }
+      if (isAdmin) { document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin"); return; }
+      const targets = document.querySelectorAll(
+        'a[href="/register-info"], a[href="/dispatch-create"], a[href="/office-work"], #claim-lookup-btn'
+      );
+      targets.forEach((el) => {
+        el.style.display = "none";
+        el.setAttribute("aria-hidden", "true");
+        el.tabIndex = -1;
+      });
+    })();
+  </script>
 
 </html>
-
 
 
 

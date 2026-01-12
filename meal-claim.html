@@ -426,7 +426,16 @@ flex-direction: column;
         margin-bottom: 8px !important;
       }
     }
-    /* logo-layout-lock */
+    /* role-menu-guard */
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/register-info"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/dispatch-create"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/office-work"] {
+      display: none !important;
+    }
+      /* logo-layout-lock */
     .logo {
       width: 100px;
       height: 24px;
@@ -441,10 +450,577 @@ flex-direction: column;
       }
     }
   </style>
-  
+  <script>
+    // admin-class-boot
+    (() => {
+      const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      if (role === "admin" || role === "관리자") {
+        document.documentElement.classList.add("is-admin");
+        document.addEventListener("DOMContentLoaded", () => {
+          document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin");
+        });
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="/second"><img class="logo" width="100" height="24" src="Dongteuk.png" alt="(&#51452;&#46041;&#53945;&#32;&#47196;&#44256;)" /></a>
+      <nav class="menu" aria-label="&#51452;&#50836;&#32;&#47700;&#45684;">
+        <a href="/second">&#50629;&#47924;&#54788;&#54889;</a>
+        <a href="/notice">&#44277;&#51648;&#49324;&#54637;</a>
+        <a href="/dispatch">&#48176;&#52264;&#54788;&#54889;</a>
+        <a href="/report">&#44592;&#49324;&#50629;&#47924;</a>
+        <a href="/office-work">&#49324;&#47924;&#50629;&#47924;</a>
+        <a href="/register-info">&#46321;&#47197;&#51221;&#48372;</a>
+        <a href="/settings">&#49444;&#51221;</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="login-meta">
+          <span id="login-user">-</span>
+          <span id="login-time">-</span>
+        </div>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="page-header">
+        <h1>&#49885;&#45824;&#52397;&#44396;</h1>
+        <div class="header-actions">
+                    <button class="logout-btn" type="button" onclick="history.back()">뒤로가기</button>
+<button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">&#47196;&#44536;&#50500;&#50883;</button>
+        </div>
+      </header>
+      <section class="card">
+        <div class="claim-header">
+          <div>
+            <h2>&#49885;&#45824;&#52397;&#44396;&#32;&#51060;&#48120;&#51648;</h2>
+            <p>&#45216;&#51648;&#48324;&#47196;&#32;&#51312;&#49885;/&#51473;&#49885;/&#49437;&#49885;&#32;&#51060;&#48120;&#51648;&#44032;&#32;&#54364;&#49884;&#46121;&#45768;&#45796;&#46;</p>
+          </div>
+          <div class="claim-controls">
+            <label for="claim-year">&#45380;&#50900;</label>
+            <select id="claim-year">
+              <option value="">&#45380;</option>
+            </select>
+            <select id="claim-month">
+              <option value="">&#50900;</option>
+            </select>
+            <button type="button" id="claim-submit">&#49440;&#53469;&#52397;&#44396;&#54616;&#44592;</button>
+          </div>
+        </div>
+        <div class="claim-list" id="claim-list"></div>
+      </section>
+    </main>
+  </div>
+  <script src="data-sync.js"></script>
+  <script>
+    const storageKeyCandidates = ["dongteukWork", "dongteukWorkReports", "dongteukWorkData"];
+    const storageKey =
+      storageKeyCandidates.find((key) => localStorage.getItem(key)) || "dongteukWork";
+    const mealImageKey = "dongteukMealImages";
+    const claimYear = document.getElementById("claim-year");
+    const claimMonth = document.getElementById("claim-month");
+    const claimList = document.getElementById("claim-list");
+    const claimSubmit = document.getElementById("claim-submit");
+
+    const getCurrentUser = () => (localStorage.getItem("dongteukCurrentUser") || "").trim();
+
+    const readWorkRows = () => {
+      try {
+        return JSON.parse(localStorage.getItem(storageKey) || "[]");
+      } catch (error) {
+        return [];
+      }
+    };
+
+    const readMealImages = () => {
+      try {
+        return JSON.parse(localStorage.getItem(mealImageKey) || "{}");
+      } catch (error) {
+        return {};
+      }
+    };
+
+    const groupByDate = (data, user) => {
+      const grouped = {};
+      Object.keys(data).forEach((key) => {
+        const [keyUser, date] = key.split("|");
+        if (!keyUser || !date || keyUser !== user) return;
+        grouped[date] = data[key];
+      });
+      return grouped;
+    };
+
+    const getMonthRange = (yearValue, monthValue) => {
+      const year = Number(yearValue);
+      const month = Number(monthValue);
+      if (!year || !month) return null;
+      const start = new Date(year, month - 1, 1);
+      const end = new Date(year, month, 0);
+      const toDateString = (date) => {
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, "0");
+        const dd = String(date.getDate()).padStart(2, "0");
+        return `${yyyy}-${mm}-${dd}`;
+      };
+      return { start: toDateString(start), end: toDateString(end) };
+    };
+
+    const formatNumber = (value) => {
+      const digits = String(value || "").replace(/\D/g, "");
+      if (!digits) return "";
+      return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    };
+
+    const getMealAmounts = (date, user) => {
+      const rows = readWorkRows().filter(
+        (row) => row.date === date && (row.user || "") === user
+      );
+      if (!rows.length) return {};
+      const row = rows[rows.length - 1];
+      return {
+        breakfast: Number(row.mealBreakfast || 0),
+        lunch: Number(row.mealLunch || 0),
+        dinner: Number(row.mealDinner || 0),
+      };
+    };
+
+    const getUserDisplayName = () => {
+      const currentUser = getCurrentUser();
+      let displayName = currentUser || "-";
+      let displayTitle = "";
+      try {
+        const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+        const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+        if (found) {
+          displayName = found.name || displayName;
+          displayTitle = found.title || "";
+        }
+      } catch (error) {
+      }
+      const titleText = displayTitle ? ` ${displayTitle}` : "";
+      return `${displayName}${titleText}`.trim();
+    };
+
+    const renderClaimList = () => {
+      if (!claimList) return;
+      const user = getCurrentUser();
+      if (!user) {
+        claimList.innerHTML = '<div class="claim-empty">&#47196;&#44536;&#51064;&#32;&#54980;&#32;&#51312;&#54924;&#54624;&#32;&#49688;&#32;&#51080;&#49845;&#45768;&#45796;&#46;</div>';
+        return;
+      }
+      const data = readMealImages();
+      const grouped = groupByDate(data, user);
+      const range =
+        claimYear && claimMonth && claimYear.value && claimMonth.value
+          ? getMonthRange(claimYear.value, claimMonth.value)
+          : null;
+      const dates = Object.keys(grouped)
+        .filter((date) => {
+          if (!range) return true;
+          return date >= range.start && date <= range.end;
+        })
+        .sort()
+        .reverse();
+
+      if (!dates.length) {
+        claimList.innerHTML = '<div class="claim-empty">&#46321;&#47197;&#46108;&#32;&#51060;&#48120;&#51648;&#44032;&#32;&#50630;&#49845;&#45768;&#45796;&#46;</div>';
+        return;
+      }
+
+      const labelMap = {
+        breakfast: "&#51312;&#49885;",
+        lunch: "&#51473;&#49885;",
+        dinner: "&#49437;&#49885;",
+      };
+
+      const groups = dates
+        .map((date) => {
+          const entry = grouped[date] || {};
+          const amounts = getMealAmounts(date, user);
+          const cards = Object.keys(labelMap)
+            .filter((key) => entry[key])
+            .map(
+              (key) => {
+                const amount = amounts[key] || 0;
+                const amountText = amount ? `${formatNumber(amount)}\uC6D0` : "";
+                return `
+              <div class="claim-card">
+                <h4>${labelMap[key]}</h4>
+                <img src="${entry[key]}" alt="${labelMap[key]}">
+                ${amountText ? `<div class="claim-amount">${amountText}</div>` : ""}
+              </div>
+            `;
+              }
+            )
+            .join("");
+          if (!cards) return "";
+          return `
+            <div class="claim-group">
+              <div class="claim-date-row">
+                <input class="claim-date-check" type="checkbox" data-date="${date}" aria-label="${date} &#52404;&#53356;">
+                <h3>${date}</h3>
+              </div>
+              <div class="claim-grid">
+                ${cards}
+              </div>
+            </div>
+          `;
+        })
+        .filter(Boolean)
+        .join("");
+
+      if (!groups) {
+        claimList.innerHTML = '<div class="claim-empty">&#46321;&#47197;&#46108;&#32;&#51060;&#48120;&#51648;&#44032;&#32;&#50630;&#49845;&#45768;&#45796;&#46;</div>';
+        return;
+      }
+
+      claimList.innerHTML = groups;
+    };
+
+    const createA4Canvas = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 2480;
+      canvas.height = 1754;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      return { canvas, ctx };
+    };
+
+    const storeClaimImages = (files, summary) => {
+      try {
+        const existing = JSON.parse(localStorage.getItem("dongteukMealClaimImages") || "[]");
+        existing.unshift({
+          ...summary,
+          files,
+        });
+        localStorage.setItem("dongteukMealClaimImages", JSON.stringify(existing.slice(0, 10)));
+      } catch (error) {
+      }
+    };
+
+    const loadImage = (src) =>
+      new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
+
+    const drawHeader = (ctx, title, name, period, pageText) => {
+      ctx.fillStyle = "#0f223d";
+      ctx.font = "bold 48px Malgun Gothic";
+      ctx.fillText(title, 80, 100);
+      ctx.font = "28px Malgun Gothic";
+      ctx.fillStyle = "#1f2a44";
+      ctx.fillText(`\uC131\uBA85: ${name}`, 80, 150);
+      ctx.fillText(`\uCCAD\uAD6C\uAE30\uAC04: ${period}`, 80, 190);
+      if (pageText) {
+        ctx.textAlign = "right";
+        ctx.fillText(pageText, 2400, 190);
+        ctx.textAlign = "left";
+      }
+    };
+
+    const drawAmountTable = (ctx, rows) => {
+      const startX = 80;
+      const startY = 240;
+      const tableWidth = 2320;
+      const rowHeight = 56;
+      const headerHeight = 60;
+      const columns = [
+        { label: "\uB0A0\uC9DC", width: 420 },
+        { label: "\uC870\uC2DD", width: 420 },
+        { label: "\uC911\uC2DD", width: 420 },
+        { label: "\uC11D\uC2DD", width: 420 },
+        { label: "\uD569\uACC4", width: 420 },
+      ];
+      ctx.strokeStyle = "#d5dbe5";
+      ctx.lineWidth = 2;
+      ctx.fillStyle = "#f4f7fc";
+      ctx.fillRect(startX, startY, tableWidth, headerHeight);
+      ctx.fillStyle = "#0f223d";
+      ctx.font = "bold 26px Malgun Gothic";
+      let x = startX;
+      columns.forEach((col) => {
+        ctx.strokeRect(x, startY, col.width, headerHeight);
+        ctx.fillText(col.label, x + 16, startY + 38);
+        x += col.width;
+      });
+      ctx.font = "24px Malgun Gothic";
+      let y = startY + headerHeight;
+      rows.forEach((row) => {
+        x = startX;
+        columns.forEach((col, index) => {
+          ctx.strokeRect(x, y, col.width, rowHeight);
+          const text = row[index] || "";
+          ctx.fillText(text, x + 16, y + 38);
+          x += col.width;
+        });
+        y += rowHeight;
+      });
+    };
+
+    const buildTableRows = (dates, user) =>
+      dates.map((date) => {
+        const amounts = getMealAmounts(date, user);
+        const breakfast = formatNumber(amounts.breakfast || 0);
+        const lunch = formatNumber(amounts.lunch || 0);
+        const dinner = formatNumber(amounts.dinner || 0);
+        const total = formatNumber(
+          Number(amounts.breakfast || 0) + Number(amounts.lunch || 0) + Number(amounts.dinner || 0)
+        );
+        return [
+          date,
+          breakfast ? `${breakfast}\uC6D0` : "-",
+          lunch ? `${lunch}\uC6D0` : "-",
+          dinner ? `${dinner}\uC6D0` : "-",
+          total ? `${total}\uC6D0` : "-",
+        ];
+      });
+
+    const buildImageItems = (dates, user, grouped) => {
+      const labelMap = {
+        breakfast: "\uC870\uC2DD",
+        lunch: "\uC911\uC2DD",
+        dinner: "\uC11D\uC2DD",
+      };
+      const items = [];
+      dates.forEach((date) => {
+        const entry = grouped[date] || {};
+        const amounts = getMealAmounts(date, user);
+        Object.keys(labelMap).forEach((key) => {
+          const src = entry[key];
+          if (!src) return;
+          const amount = amounts[key] || 0;
+          const amountText = amount ? `${formatNumber(amount)}\uC6D0` : "";
+          items.push({
+            date,
+            label: labelMap[key],
+            amount: amountText,
+            src,
+          });
+        });
+      });
+      return items;
+    };
+
+    const drawImagePages = async (items, name, period, startIndex) => {
+      const pages = [];
+      const margin = 80;
+      const gap = 24;
+      const headerHeight = 200;
+      const cardWidth = (2480 - margin * 2 - gap * 2) / 3;
+      const cardHeight = 520;
+      const imageHeight = 360;
+      const captionHeight = 60;
+      const availableHeight = 1754 - margin - headerHeight - margin;
+      const rowsPerPage = Math.max(1, Math.floor((availableHeight + gap) / (cardHeight + gap)));
+      const itemsPerPage = rowsPerPage * 3;
+
+      for (let i = 0; i < items.length; i += itemsPerPage) {
+        const pageItems = items.slice(i, i + itemsPerPage);
+        const { canvas, ctx } = createA4Canvas();
+        const pageNumber = startIndex + pages.length + 1;
+        drawHeader(ctx, "\uC2DD\uB300\uCCAD\uAD6C \uC601\uC218\uC99D", name, period, `Page ${pageNumber}`);
+        let x = margin;
+        let y = margin + headerHeight;
+        let col = 0;
+        for (const item of pageItems) {
+          const img = await loadImage(item.src);
+          ctx.strokeStyle = "#d5dbe5";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(x, y, cardWidth, cardHeight);
+          const ratio = Math.min(cardWidth / img.width, imageHeight / img.height);
+          const drawW = img.width * ratio;
+          const drawH = img.height * ratio;
+          const imgX = x + (cardWidth - drawW) / 2;
+          const imgY = y + 12;
+          ctx.drawImage(img, imgX, imgY, drawW, drawH);
+          ctx.fillStyle = "#0f223d";
+          ctx.font = "24px Malgun Gothic";
+          const caption = `${item.date} ${item.label}`;
+          ctx.fillText(caption, x + 16, y + imageHeight + 40);
+          if (item.amount) {
+            ctx.font = "22px Malgun Gothic";
+            ctx.fillStyle = "#1f2a44";
+            ctx.fillText(item.amount, x + 16, y + imageHeight + 70);
+          }
+          col += 1;
+          if (col === 3) {
+            col = 0;
+            x = margin;
+            y += cardHeight + gap;
+          } else {
+            x += cardWidth + gap;
+          }
+        }
+        pages.push(canvas);
+      }
+      return pages;
+    };
+
+    const downloadClaimJpg = async () => {
+      const user = getCurrentUser();
+      if (!user) {
+        alert("\uB85C\uADF8\uC778 \uD6C4 \uC774\uC6A9\uD574 \uC8FC\uC138\uC694.");
+        return;
+      }
+      const checked = Array.from(document.querySelectorAll(".claim-date-check:checked"));
+      if (!checked.length) {
+        alert("\uCCB4\uD06C\uD55C \uB0A0\uC9DC\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.");
+        return;
+      }
+      const dates = checked
+        .map((input) => input.getAttribute("data-date"))
+        .filter(Boolean)
+        .sort();
+      const displayName = getUserDisplayName();
+      const period = `${dates[0]} ~ ${dates[dates.length - 1]}`;
+      const data = readMealImages();
+      const grouped = groupByDate(data, user);
+      const tableRows = buildTableRows(dates, user);
+      const { canvas, ctx } = createA4Canvas();
+      drawHeader(ctx, "\uC2DD\uB300\uCCAD\uAD6C", displayName, period, "Page 1");
+      drawAmountTable(ctx, tableRows);
+      const imageItems = buildImageItems(dates, user, grouped);
+      const imagePages = await drawImagePages(imageItems, displayName, period, 1);
+      const dateLabel = dates.length === 1 ? dates[0] : `${dates[0]}_${dates[dates.length - 1]}`;
+      const createdAt = new Date().toISOString();
+      const claimId = `${user}-${createdAt}`;
+      try {
+        const requestKey = "dongteukMealClaimRequests";
+        const existing = JSON.parse(localStorage.getItem(requestKey) || "{}");
+        const userDates = new Set([...(existing[user] || []), ...dates]);
+        existing[user] = Array.from(userDates).sort();
+        localStorage.setItem(requestKey, JSON.stringify(existing));
+      } catch (error) {
+      }
+      const files = [
+        {
+          name: `\uC2DD\uB300\uCCAD\uAD6C-${dateLabel}-1.jpg`,
+          dataUrl: canvas.toDataURL("image/jpeg", 0.92),
+        },
+      ];
+      imagePages.forEach((page, index) => {
+        files.push({
+          name: `\uC2DD\uB300\uCCAD\uAD6C-${dateLabel}-${index + 2}.jpg`,
+          dataUrl: page.toDataURL("image/jpeg", 0.92),
+        });
+      });
+      localStorage.setItem(
+        "dongteukMealClaimSummary",
+        JSON.stringify({
+          name: displayName,
+          period,
+          dates,
+          createdAt,
+        })
+      );
+      storeClaimImages(files, { id: claimId, name: displayName, user: user, period, dates, createdAt });
+    };
+
+    const fillClaimYearMonth = () => {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth() + 1;
+      if (claimYear) {
+        for (let y = currentYear - 2; y <= currentYear + 2; y += 1) {
+          const option = document.createElement("option");
+          option.value = String(y);
+          option.textContent = `${y}\uB144`;
+          if (y === currentYear) option.selected = true;
+          claimYear.appendChild(option);
+        }
+      }
+      if (claimMonth) {
+        for (let m = 1; m <= 12; m += 1) {
+          const option = document.createElement("option");
+          option.value = String(m).padStart(2, "0");
+          option.textContent = `${m}\uC6D4`;
+          if (m === currentMonth) option.selected = true;
+          claimMonth.appendChild(option);
+        }
+      }
+    };
+
+    if (claimYear) {
+      claimYear.addEventListener("change", renderClaimList);
+    }
+    if (claimMonth) {
+      claimMonth.addEventListener("change", renderClaimList);
+    }
+    if (claimSubmit) {
+      claimSubmit.addEventListener("click", () => {
+        downloadClaimJpg();
+      });
+    }
+
+    fillClaimYearMonth();
+    renderClaimList();
+
+    const renderLoginMeta = () => {
+      const userEl = document.getElementById("login-user");
+      const timeEl = document.getElementById("login-time");
+      if (!userEl || !timeEl) return;
+
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+      let displayName = currentUser || "-";
+      let displayTitle = "";
+      try {
+        const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+        const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+        if (found) {
+          displayName = found.name || displayName;
+          displayTitle = found.title || "";
+        }
+      } catch (error) {
+      }
+      const titleText = displayTitle ? ` ${displayTitle}` : "";
+      userEl.textContent = `${displayName}${titleText}`;
+
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const hh = String(now.getHours()).padStart(2, "0");
+      const min = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      timeEl.textContent = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+    };
+
+    renderLoginMeta();
+    setInterval(renderLoginMeta, 1000);
+  </script>
+  <script>
+    // office-menu-guard
+    (() => {
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+            const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      let isAdmin = role === "admin" || role === "관리자";
+      if (currentUser) {
+        try {
+          const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+          const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+          isAdmin = Boolean(found && found.status === "관리자");
+        } catch (error) {
+          isAdmin = false;
+        }
+      }
+      if (isAdmin) { document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin"); return; }
+      const targets = document.querySelectorAll('a[href="/office-work"]');
+      targets.forEach((el) => {
+        el.style.display = "none";
+        el.setAttribute("aria-hidden", "true");
+        el.tabIndex = -1;
+      });
+    })();
+  </script>
 </body>
 </html>
-
 
 
 

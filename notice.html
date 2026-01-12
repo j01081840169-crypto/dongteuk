@@ -431,7 +431,16 @@
         margin-bottom: 8px !important;
       }
     }
-    /* logo-layout-lock */
+    /* role-menu-guard */
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/register-info"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/dispatch-create"],
+    html:not(.is-admin) .menu a,
+    body:not(.is-admin) .menu a[href="/office-work"] {
+      display: none !important;
+    }
+      /* logo-layout-lock */
     .logo {
       width: 100px;
       height: 24px;
@@ -446,10 +455,234 @@
       }
     }
   </style>
-  
+  <script>
+    // admin-class-boot
+    (() => {
+      const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      if (role === "admin" || role === "관리자") {
+        document.documentElement.classList.add("is-admin");
+        document.addEventListener("DOMContentLoaded", () => {
+          document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin");
+        });
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="/second"><img class="logo" width="100" height="24" src="Dongteuk.png" alt="(주)동특 로고" /></a>
+      <nav class="menu" aria-label="주요 메뉴">
+        <a href="/second">&#50629;&#47924;&#54788;&#54889;</a>
+        <a class="active" href="/notice">공지사항</a>
+        <a href="/dispatch">배차현황</a>
+        <a href="/report">기사업무</a>
+        <a href="/office-work">&#49324;&#47924;&#50629;&#47924;</a>
+        <a href="/register-info">등록정보</a>
+        <a href="/settings">설정</a>
+            
+      </nav>
+<div class="sidebar-footer">
+        <div class="login-meta">
+          <span id="login-user">-</span>
+          <span id="login-time">-</span>
+        </div>
+      </div></aside>
+
+    <main class="main">
+      <header class="page-header">
+        <h1>공지사항</h1>
+          <div class="header-actions">
+      <button class="action-btn" type="button" id="notice-write" onclick="location.href='/notice-create'">글쓰기</button>
+      <button class="action-btn" type="button" id="notice-clear">전체 삭제</button>
+      <button class="action-btn" type="button" id="notice-delete-selected">선택 삭제</button>
+      <button class="logout-btn" type="button" onclick="localStorage.removeItem('dongteukCurrentUser'); localStorage.removeItem('dongteukCurrentRole'); location.href='/logout'">로그아웃</button>
+    </div></header>
+
+      <section class="card">
+        <table class="notice-table">
+          <thead>
+            <tr>
+              <th style="width: 36px;">
+                <input type="checkbox" id="notice-select-all" aria-label="전체 선택" />
+              </th>
+              <th style="width: 70px;">번호</th>
+              <th>제목</th>
+              <th style="width: 90px;">작성자</th>
+              <th style="width: 110px;">등록일</th>
+              <th style="width: 70px;">조회</th>
+            </tr>
+          </thead>
+          <tbody id="notice-body"></tbody>
+        </table>
+        <div class="meta">최근 5건만 표시됩니다.</div>
+      </section>
+    </main>
+  </div>
+  <script src="data-sync.js"></script>
+  <script>
+    const noticeBody = document.getElementById("notice-body");
+    const noticeClear = document.getElementById("notice-clear");
+    const noticeDeleteSelected = document.getElementById("notice-delete-selected");
+    const noticeSelectAll = document.getElementById("notice-select-all");
+
+    const readNotices = () => {
+      try {
+        const raw = localStorage.getItem("dongteukNotices") || "[]";
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    };
+
+    const renderNotices = () => {
+      if (!noticeBody) return;
+      const notices = readNotices().slice(0, 5);
+      if (!notices.length) {
+        noticeBody.innerHTML = `
+          <tr>
+            <td colspan="6">등록된 공지사항이 없습니다.</td>
+          </tr>
+        `;
+        if (noticeSelectAll) {
+          noticeSelectAll.checked = false;
+        }
+        return;
+      }
+      noticeBody.innerHTML = notices
+        .map((notice) => {
+          const tag = notice.category ? ` <span class="tag">${notice.category}</span>` : "";
+          const author = notice.author || "-";
+          const link = `/notice-view?id=${notice.id}`;
+          return `
+            <tr>
+              <td><input type="checkbox" class="notice-select" data-id="${notice.id}" /></td>
+              <td>${notice.id || "-"}</td>
+              <td><a href="${link}">${notice.title || "-"}</a>${tag}</td>
+              <td>${author}</td>
+              <td>${notice.createdAt || "-"}</td>
+              <td>${notice.views || 0}</td>
+            </tr>
+          `;
+        })
+        .join("");
+    };
+
+    renderNotices();
+
+    if (noticeSelectAll) {
+      noticeSelectAll.addEventListener("change", () => {
+        const targets = document.querySelectorAll(".notice-select");
+        targets.forEach((input) => {
+          input.checked = noticeSelectAll.checked;
+        });
+      });
+    }
+
+    if (noticeDeleteSelected) {
+      noticeDeleteSelected.addEventListener("click", () => {
+        const checked = Array.from(document.querySelectorAll(".notice-select"))
+          .filter((input) => input.checked)
+          .map((input) => Number(input.dataset.id))
+          .filter((id) => Number.isFinite(id));
+        if (!checked.length) {
+          alert("선택된 공지사항이 없습니다.");
+          return;
+        }
+        const confirmed = confirm("선택한 공지사항을 삭제할까요?");
+        if (!confirmed) return;
+        const remaining = readNotices().filter((notice) => !checked.includes(Number(notice.id)));
+        localStorage.setItem("dongteukNotices", JSON.stringify(remaining));
+        new BroadcastChannel("dongteuk-sync").postMessage({ key: "dongteukNotices" });
+        renderNotices();
+        if (noticeSelectAll) noticeSelectAll.checked = false;
+      });
+    }
+
+    if (noticeClear) {
+      noticeClear.addEventListener("click", () => {
+        const confirmed = confirm("저장된 공지사항을 모두 삭제할까요?");
+        if (!confirmed) return;
+        localStorage.removeItem("dongteukNotices");
+        new BroadcastChannel("dongteuk-sync").postMessage({ key: "dongteukNotices" });
+        renderNotices();
+        alert("공지사항이 삭제되었습니다.");
+      });
+    }
+
+    const renderLoginMeta = () => {
+      const userEl = document.getElementById("login-user");
+      const timeEl = document.getElementById("login-time");
+      if (!userEl || !timeEl) return;
+
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+      let displayName = currentUser || "-";
+      let displayTitle = "";
+      try {
+        const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+        const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+        if (found) {
+          displayName = found.name || displayName;
+          displayTitle = found.title || "";
+        }
+      } catch (error) {
+      }
+      const titleText = displayTitle ? ` ${displayTitle}` : "";
+      userEl.textContent = `${displayName}${titleText}`;
+
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mi = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      timeEl.textContent = `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
+    };
+
+    renderLoginMeta();
+    setInterval(renderLoginMeta, 1000);
+  </script>
+  <script>
+    // admin-menu-guard
+    (() => {
+      const currentUser = (localStorage.getItem("dongteukCurrentUser") || "").trim();
+            const role = (localStorage.getItem("dongteukCurrentRole") || "").trim();
+      let isAdmin = role === "admin" || role === "관리자";
+      if (currentUser) {
+        try {
+          const drivers = JSON.parse(localStorage.getItem("dongteukDrivers") || "[]");
+          const found = drivers.find((item) => (item.name || "").trim() === currentUser);
+          isAdmin = Boolean(found && found.status === "관리자");
+        } catch (error) {
+          isAdmin = false;
+        }
+      }
+      if (isAdmin) { document.documentElement.classList.add("is-admin");
+        document.body.classList.add("is-admin"); return; }
+      const writeBtn = document.getElementById("notice-write");
+      const clearBtn = document.getElementById("notice-clear");
+      const deleteBtn = document.getElementById("notice-delete-selected");
+      [writeBtn, clearBtn, deleteBtn].forEach((btn) => {
+        if (!btn) return;
+        btn.style.display = "none";
+        btn.setAttribute("aria-hidden", "true");
+        btn.tabIndex = -1;
+      });
+      const targets = document.querySelectorAll(
+        'a[href="/register-info"], a[href="/dispatch-create"], a[href="/office-work"]'
+      );
+      targets.forEach((el) => {
+        el.style.display = "none";
+        el.setAttribute("aria-hidden", "true");
+        el.tabIndex = -1;
+      });
+    })();
+  </script>
 
 </html>
-
 
 
 
